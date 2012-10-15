@@ -7,6 +7,6 @@ imin=min(imin(:));
 % Make a z-projection of the stac using max value and normalizing, then
 % clear the stack
 zim = max(ims,[],3);
-%Normilize the projection
+%Normilize the projection and maximaze contrast
 zim =(zim-min(zim(:)))/(max(zim(:))-min(zim(:)));
 %zim =zim./max(zim(:));
