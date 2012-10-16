@@ -1,15 +1,17 @@
 clear all;close all;clc
-stack_dapi='./data/dapi_008.tif';
+stack_dapi='./data/dapi_003.tif';
 % Parse stack, in this function they also take into account filtering outlier images
 ims=parse_stack(stack_dapi,1,40);
 zim_dapi = zproject(ims);
 %perform segmentation by watershed method
 DL=segmentNuclei(zim_dapi);
 %filtler for area and background
-[nuclei BW]=filterSegmentation(DL,zim_dapi);clear DL;
+h=figure();ax=axes('Parent',h);
+[nuclei BW]=filterSegmentation(DL,zim_dapi,ax);clear DL;
+axis(ax,'image','square','off','xy');
 %%
 %filter bad segmentation for 17 and 18
-[nuclei BW]=filterSegmentation(BW,zim_dapi,[17 18]);
+[nuclei BW]=filterSegmentation(BW,zim_dapi,ax,[16]);
 %calculate DAPI intensity as the sum of its intensity throughout the stack
 %minus the bg 
     for j=1:numel(nuclei);
@@ -19,7 +21,7 @@ DL=segmentNuclei(zim_dapi);
 clear ims tmp stack_dapi zim_dapi j;
 %%
 %IMPORTANT:still have to correct for the shift
-stacks={'./data/cy5_008.tif','./data/a594_008.tif','./data/tmr_008.tif'};
+stacks={'./data/cy5_003.tif','./data/a594_003.tif'};
 UData=struct('Sigma',[],'Stacks',[],'R',[]);
 c=0;
   figure;
@@ -30,7 +32,7 @@ for ch = 1:numel(stacks);
     stacks{ch}
     cims=parse_stack(stacks{ch},1,40);
     %filter ims
-    cims=LOG_filter(cims,15,1.5);
+    % cims=LOG_filter(cims,15,1.5);
     % Normalize ims
     cims = cims/max(cims(:));
     %Assess Sigma
@@ -56,5 +58,5 @@ UData.Stacks=[UData.Stacks; [stacks(ch) num2str(size(cims))]];
 end
 
 
-clear Sigma Smax Rmax cims ch j lab stacks c m BW ndots n_nuc i
+clear Sigma Smax Rmax cims ch j lab stacks c m BW ndots n_nuc i h ax ans
 

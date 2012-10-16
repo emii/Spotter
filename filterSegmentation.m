@@ -15,7 +15,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     % bwboundaries() returns a cell array, where each cell contains the row/column coordinates for an object in the image.
     % Plot the borders of all the coins on the original grayscale image using the coordinates returned by bwboundaries.
     cla(ax);
-    imagesc(zim,'Parent',ax);colormap gray;axis square;axis off;axis image;
+    imagesc(zim,'Parent',ax);colormap gray;
     %title('Labeled segmented nuclei()'); axis square;
     hold on;
     boundaries = bwboundaries(DL2);	
