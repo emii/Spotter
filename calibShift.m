@@ -23,7 +23,7 @@ else
     [ptsDapi, ptsCh] = cpselect(dapi, tmr, ptsDapi,ptsCh,'Wait', true);
 end
 %%
-tform = cp2tform(ptsDapi, ptsCh, 'projective');
+tform = cp2tform(ptsCh,ptsDapi, 'projective');
 
 imChTrans = imtransform(tmr, tform, ...
         'XData', [1, size(dapi, 2)], ...

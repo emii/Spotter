@@ -33,7 +33,7 @@ width=0.6;
     panelMenu = uipanel( ...
         'Parent', fig, ...
         'Units', 'normalized', ...
-        'Position', [.57, .49, .18, .50], ...
+        'Position', [.57, .49, .1, .50], ...
         'Title', 'Menu');
     
     panelNucleiList = uipanel( ...
@@ -45,8 +45,8 @@ width=0.6;
     panelSettings = uipanel( ...
         'Parent', fig, ...
         'Units', 'normalized', ...
-        'Position', [.57, .01, .18, .47], ...
-        'Title', 'Calibration and Settings');
+        'Position', [.57, .01, .1, .47], ...
+        'Title', 'Settings');
     
     %panelMessage: message text
     handles.uiMessage = uicontrol(...
@@ -54,6 +54,7 @@ width=0.6;
         'Style', 'text', ...
         'Units', 'normalized', ...
         'Position', [.01, .01, .9, .9], ...
+        'FontSize',16,...
         'String', 'Load an image stack or start calibration');
     
     % panelImageStack: axes for Image Stack
@@ -103,7 +104,8 @@ width=0.6;
         'Units', 'normalized', ...
         'Position', [.51, .76, .47, .1], ...
         'String', 'Load', ...
-        'Callback', '', ...
+        'UserData',c1, ...
+        'Callback', @loadCalibration_Callback, ...
         'BusyAction', 'cancel');
     
     %shift calibration for a594
@@ -139,7 +141,8 @@ width=0.6;
         'Units', 'normalized', ...
         'Position', [.51, .50, .47, .1], ...
         'String', 'Load', ...
-        'Callback', '', ...
+        'UserData',c2, ...
+        'Callback', @loadCalibration_Callback, ...
         'BusyAction', 'cancel');
     
     %shift calibration for tmr
@@ -175,7 +178,8 @@ width=0.6;
         'Units', 'normalized', ...
         'Position', [.51, .24, .47, .1], ...
         'String', 'Load', ...
-        'Callback', '', ...
+        'UserData',c3, ...
+        'Callback', @loadCalibration_Callback, ...
         'BusyAction', 'cancel');
     
     % panelMenu: buttons for all accessible actions
@@ -184,7 +188,7 @@ width=0.6;
         'Style', 'pushbutton', ...
         'Units', 'normalized', ...
         'Position', [.05, .85, .9, .1], ...
-        'String', 'Open Image Stack Set', ...
+        'String', 'Open Stack Set', ...
         'Callback', @open_imStack_Callback, ...
         'BusyAction', 'cancel');
     
@@ -214,7 +218,8 @@ width=0.6;
         'Position', [.05, .25, .9, .2], ...
         'Callback', '', ...
         'BusyAction', 'cancel', ...
-        'HorizontalAlignment','right',...
+        'HorizontalAlignment','center',...
+        'FontName','courier',...
         'Max', 2, 'Min', 0); % this allows multiple selections
     
     handles.uiCount = uicontrol( ...
@@ -232,7 +237,7 @@ width=0.6;
         'Units', 'normalized', ...
         'Position', [.05, .05, .9, .1], ...
         'String', 'Save Counts', ...
-        'Callback', '', ...
+        'Callback', @saveCounts_Callback, ...
         'BusyAction', 'cancel');
     
     % panelNucleiList: listbox showing the available channels
@@ -291,6 +296,7 @@ function open_imStack_Callback(hObject,eventdata)
      UserData.files=files;
      UserData.channels=channels;
      set(h.f,'UserData',UserData);
+     message(h,['Loaded DAPI channel from selected stack set: ' file_index]);
 end
 %project image stack
 function project_imStack_Callback(hObject,eventdata)
@@ -300,10 +306,12 @@ function project_imStack_Callback(hObject,eventdata)
     imagesc(zim,'Parent',h.imStack);colormap gray;
     UserData.I2=zim;
     set(h.f,'Userdata',UserData);
+    message(h,'Z-projection using max()...done');
 end
 %segment nuclei
 function autoSegment_Callback(hObject,eventdata)
     h=guidata(hObject);
+    message(h,'Performing segmentation, please wait...');
     UserData=get(h.f,'UserData');
     DL=segmentNuclei(UserData.I2);
     %filtler for area and background
@@ -313,28 +321,29 @@ function autoSegment_Callback(hObject,eventdata)
     set(h.f,'Userdata',UserData);
     nuclei_Labels={nuclei.Label};
     set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
+    message(h,'Segmentation ... done, select wrong segmented nuclei -> to be removed');
 end
 %remove segmented nuclei
 function rmNuclei_Callback(hObject,eventdata)
     h=guidata(hObject);
+    set(h.NucleiList,'String','');
+    cla(h.imStack);
     UserData=get(h.f,'UserData');
     selection=get(h.NucleiList,'Value');
+    message(h,['Removing the folowing nuclei: ' num2str(selection) 'please wait ...']);
     [nuclei BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
-    for j=1:numel(nuclei);
-        tmp=UserData.I.*repmat(BW==j,[1,1,size(UserData.I,3)]);
-        nuclei(j).dapi=sum(tmp(:));% correct for bg still missing
-    end
     UserData.nuclei=nuclei;
     UserData.BW=BW;
     set(h.f,'Userdata',UserData);
     nuclei_Labels={nuclei.Label};
     set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
+    message(h,['Nuclei removed, ' num2str(numel(nuclei)) 'nuclei re-labeled']);
 end
 %select segmented nuclei to remove
 function rmNucleiList_Callback(hObject,eventdata)
     h=guidata(hObject);
     selection=get(gcbo,'Value'); 
-    message(h,selection);    
+    message(h,['Selected nuclei to be removed: ' num2str(selection)]);    
 end
 %count dots for selected channels
 function countDots_Callback(hObject, eventdata)
@@ -346,24 +355,52 @@ function newCalibration_Callback(hObject,eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
     c=get(gcbo,'UserData');
-    [imname, impath, imfilter_index] = uigetfile([c.name '*.tif'],'Open an beads file (.tif) for channel');
+    [imname, impath, imfilter_index] = uigetfile([c.name '*.tif'],['Open an beads file (.tif) for channel ' c.name]);
     if imfilter_index
     file_index=imname((end-6):(end-4));
     ch_b_file=[impath imname];
     dapi_b_file=[impath 'dapi_' file_index '.tif'];
-    tform=calibrateShift(dapi_b_file,ch_b_file);
-    hold on
+    [tform, dapip, chp]=calibrateShift(dapi_b_file,ch_b_file);
     [svName,svPath,FilterIndex] = uiputfile('*.mat','Save your calibration',[impath c.name 'calib']);
         if FilterIndex
-        svFullPath=fullfile(svPath, svName);
-        save(svFullPath,'-mat','tform')
-        Userdata.tform{c.val}=tform;
-        set(h.pathCalib{c.val},'String',svName)
-        set(h.f,'Userdata',UserData);
+            svFullPath=fullfile(svPath, svName);
+            UserData.tform{c.val}=tform;
+            set(h.f,'Userdata',UserData);
+            save(svFullPath,'-mat','tform','dapip','chp')
+            set(h.pathCalib{c.val},'String',svName)
         else 
             return
         end
     else 
+        return
+    end
+end
+%load previously calculated calibration
+function loadCalibration_Callback(hObject,eventdata)
+    h=guidata(hObject);
+    UserData=get(h.f,'UserData');
+    c=get(gcbo,'UserData');
+    [mname, mpath, mfilter_index] = uigetfile('*.mat',['Open calibration file for channel ' c.name]);
+    if mfilter_index
+        mFullPath=fullfile(mpath, mname);
+        load(mFullPath,'-mat','tform')
+        UserData.tform{c.val}=tform;
+        set(h.f,'Userdata',UserData);
+        set(h.pathCalib{c.val},'String',mname)
+    else
+        return
+    end
+end
+%save User Data
+function saveCounts_Callback(hObject,eventdata)
+    h=guidata(hObject);
+    UserData=get(h.f,'UserData');
+    [svName,svPath,FilterIndex] = uiputfile('*.mat','Save your calibration',[UserData.dirpath 'UserData' UserData.index]);
+    if FilterIndex
+        UserData.I=UserData.I2;
+        svFullPath=fullfile(svPath, svName);
+        save(svFullPath,'-mat','UserData')
+    else
         return
     end
 end
