@@ -24,9 +24,6 @@ end
 
     [ptsDapi, ptsCh] = cpselect(dapi, ch, 'Wait', true);
     
-methods={'affine', 'projective', 'piecewise linear', 'lwm'};
-tform=cell(4,1);
-    for i = 1:4   
     fig = figure( ...
             'Units', 'pixel', ...
             'Position', pos, ...
@@ -36,13 +33,13 @@ tform=cell(4,1);
             'Resize', 'on', ...
             'Visible', 'off');    
 
-        tform{i} = cp2tform(ptsCh, ptsDapi, methods{i});
+        tform = cp2tform(ptsCh, ptsDapi, 'projective');
 
 
 
 
 
-        imChTrans = imtransform(ch, tform{i}, ...
+        imChTrans = imtransform(ch, tform, ...
             'XData', [1, size(dapi, 2)], ...
             'YData', [1, size(dapi, 1)]);
 
@@ -65,11 +62,11 @@ tform=cell(4,1);
         overlayedImages(:, :, 1) = dapi;
         overlayedImages(:, :, 2) = imChTrans;
         axes(ha(2));
-        imshow(im2uint16(overlayedImages),[]);title(methods{i},'Fontsize',18)
+        imshow(im2uint16(overlayedImages),[]);title('After','Fontsize',18)
         axis(ha(2),'off','image','ij','square');
         set(fig,'Visible','on')
         waitfor(fig)
-    end
+   
 end
 
 
