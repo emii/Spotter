@@ -237,7 +237,7 @@ function countDots_Callback(hObject, eventdata)
     UserData=get(h.f,'UserData');
     UserData.Sigma=1:.5:2;
     selection=get(h.ChannelList,'Value');
-    [UData adots]=countDots(UserData,selection);
+    [UData adots]=countDots2(UserData,selection);
     UserData.UData=UData;
     UserData.dots=adots;
     set(h.f,'Userdata',UserData);

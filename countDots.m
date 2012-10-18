@@ -24,6 +24,7 @@ fig=figure();
         cims=LOG_filter(cims,15,1.5);
         % Normalize ims
         cims = cims/max(cims(:));
+        save()
         %Assess Sigma
         [ndots Rmax Smax lab m]=sigma_threshold(cims,BW,nuclei,Sigma,ch);
         subplot(3,2,ch+c);plot(Sigma,[m.R],'r-');title('R_sigma')
