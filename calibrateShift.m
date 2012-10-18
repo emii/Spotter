@@ -1,4 +1,4 @@
-function [tform,ptsDapi, ptsCh]=calibrateShift(dapi_b_file,ch_b_file)
+function tform=calibrateShift(dapi_b_file,ch_b_file)
 
 scr=get(0, 'ScreenSize');
 pos=[scr(1:2)+scr(3:4).*0.01,scr(3:4).*0.95];
@@ -34,10 +34,6 @@ end
             'Visible', 'off');    
 
         tform = cp2tform(ptsCh, ptsDapi, 'projective');
-
-
-
-
 
         imChTrans = imtransform(ch, tform, ...
             'XData', [1, size(dapi, 2)], ...

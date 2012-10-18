@@ -1,14 +1,11 @@
-function ims=parse_stack(filename,first,last,FILTER_OUTLIER)
+function ims=parse_stack(filename,first,last,tform)
 
 % ims=parse_stack(filename)
 % 12/11/09
 % Parses metamorph stack file with S 2D images of size n*m and outputs a
-% n*m*S double 3D array
+% n*m*S double 3D array if tform is specified, the stack is spatially
+% transformed.
 
-if nargin<4,
-    FILTER_OUTLIER=0;
-end
-ZTHRESH=5;
 
 info=imfinfo(filename);
 if last>length(info),
@@ -18,11 +15,25 @@ end
 if nargin < 2
     stack = imread(filename);
 else
-    stack=zeros(1024,1024,last-first+1);
-    for i=first:last,
-        stack(:,:,i) = imread(filename,i,'info',info);%returns double
-        %stack(:,:,i) = imread(filename,'Index',i,'Info',info);%returns uint16
+    if nargin <4
+        stack=zeros(1024,1024,last-first+1);
+        
+        for i=first:last,
+            stack(:,:,i) = imread(filename,i,'info',info);%returns double
+            %stack(:,:,i) = imread(filename,'Index',i,'Info',info);%returns uint16
+        end
+    
+    else
+        stack=zeros(1024,1024,last-first+1);
+        
+        for i=first:last,
+            tmp = imread(filename,i,'info',info);%returns double
+            stack(:,:,i) = imtransform(tmp, tform, ...
+            'XData', [1, size(stack, 2)], ...
+            'YData', [1, size(stack, 1)]);
+        end
     end
+        
 end
 
 ims=stack;
