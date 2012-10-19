@@ -2,12 +2,28 @@ clear all;close all;clc
 stack_dapi='./data/dapi_005.tif';
 % Parse stack, in this function they also take into account filtering outlier images
 ims=parse_stack(stack_dapi,1,50);
-zim_dapi = zproject(ims);
+zim_dapi=zproject(ims);
+I = zim_dapi;
+H = FSPECIAL('disk',15);
+I=imfilter(I,H,'replicate');
+%   H = FSPECIAL('unsharp',0.5);
+%  I=imfilter(I,H,'replicate');
+se = strel('disk', 20);
+Io = imopen(I, se);
+Ie = imerode(I, se);
+Iobr = imreconstruct(Ie, I);
+Ioc = imclose(Io, se);
+Iobrd = imdilate(Iobr, se);
+Iobrcbr = imreconstruct(imcomplement(Iobrd), imcomplement(Iobr));
+Iobrcbr = imcomplement(Iobrcbr);
+
+
+ 
 %perform segmentation by watershed method
-DL=segmentNuclei(zim_dapi);
+DL=segmentNuclei(Iobrcbr);
 %filtler for area and background
 scr=get(0, 'ScreenSize');
-pos=[scr(1:2)+scr(3:4).*0.25,scr(3:4).*0.75];
+pos=[scr(1:2)+scr(3:4).*0.05,scr(3:4).*0.8];
 fig = figure( ...
         'Units', 'pixel', ...
         'Position', pos, ...
@@ -21,13 +37,13 @@ fig = figure( ...
     
     
 ax= axes('Parent', fig,'Units', 'normalized', ...
-        'OuterPosition', [.0, .0, 1.0, 1.0]);
+        'Position', [.0, .0, 1.0, 1.0]);
  
 [nuclei BW]=filterSegmentation(DL,zim_dapi,ax);clear DL;
    axis(ax,'off','image','ij','square');
 %%
 %filter bad segmentation for 17 and 18
-[nuclei BW]=filterSegmentation(BW,zim_dapi,ax,[16]);
+[nuclei BW]=filterSegmentation(BW,zim_dapi,ax,[19]);
 %calculate DAPI intensity as the sum of its intensity throughout the stack
 %minus the bg 
     for j=1:numel(nuclei);
@@ -37,7 +53,7 @@ ax= axes('Parent', fig,'Units', 'normalized', ...
 clear ims tmp stack_dapi zim_dapi j;
 %%
 %IMPORTANT:still have to correct for the shift
-stacks={'./data/cy5_003.tif','./data/a594_003.tif'};
+stacks={'./data/cy5_005.tif','./data/a594_005.tif'};
 UData=struct('Sigma',[],'Stacks',[],'R',[]);
 c=0;
   figure;
@@ -46,7 +62,7 @@ c=0;
         adots(n_nuc).Label=NaN;%preallocate structure array
 for ch = 1:numel(stacks);
     stacks{ch}
-    cims=parse_stack(stacks{ch},1,40);
+    cims=parse_stack(stacks{ch},1,50);
     %filter ims
     % cims=LOG_filter(cims,15,1.5);
     % Normalize ims
