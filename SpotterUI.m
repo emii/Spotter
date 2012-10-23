@@ -164,7 +164,7 @@ function open_imStack_Callback(hObject,eventdata)
      UserData=get(h.f,'UserData');
      [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)');
         file_index=imname((end-6):(end-4));        
-        [files,channels]=all_channel_names(impath,file_index);
+        [files,channels]=utilities.all_channel_names(impath,file_index);
         set(h.ChannelList,'String',files); 
      if imfilter_index
          ims=parse_stack([impath 'dapi_' file_index '.tif'],1,40);
@@ -237,7 +237,7 @@ function countDots_Callback(hObject, eventdata)
     UserData=get(h.f,'UserData');
     UserData.Sigma=1:.5:2;
     selection=get(h.ChannelList,'Value');
-    [UData adots]=countDots(UserData,selection);
+    [UData adots]=countDots2(UserData,selection);
     UserData.UData=UData;
     UserData.dots=adots;
     set(h.f,'Userdata',UserData);

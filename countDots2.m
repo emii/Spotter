@@ -24,8 +24,10 @@ fig=figure();
         cims=LOG_filter(cims,15,1.5);
         % Normalize ims
         cims = cims/max(cims(:));
-        [nout,thresholds] = BW_multithreshstack(cims,BW,200);
-        subplot(1,numel(stacks),ch);plot(thresholds,nout);title(stacks{ch})
-   
+        %[nout,thresholds] = BW_multithreshstack(cims,BW,200);
+        thresholdfn = multithreshstack(cims,BW);
+        thresholds = (1:100)/100;
+        subplot(1,numel(stacks),ch);plot(thresholds,thresholdfn);title(stacks{ch})
+        ylim([0 200])
     end
 end
