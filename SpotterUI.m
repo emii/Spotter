@@ -267,11 +267,14 @@ end
 function countDots_Callback(hObject, eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
-    UserData.Threshold_numbers=100;
+    UserData.threshold_num=100;
     selection=get(h.ChannelList,'Value');
-    [UData adots]=countDots(UserData,selection);
-    UserData.UData=UData;
-    UserData.dots=adots;
+    
+    
+    thresholdDots(UserData,h,selection);
+%     [UData adots]=countDots(UserData,h,selection,);
+%     UserData.UData=UData;
+%     UserData.dots=adots;
     set(h.f,'Userdata',UserData);
     
 end
