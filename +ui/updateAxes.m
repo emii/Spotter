@@ -9,7 +9,8 @@ function updateAxes(h,x,y,cvx,dots,n_ims,snuc,thresholds,thresholdfn,cv)
     yl1=min(thresholdfn(thresholds<0.17));
     
     plot(h.ax{1},thresholds,thresholdfn,'Color',[.6 .6 .6]);
-    line([x x],[0 yl1],'Color','r','Parent',h.ax{1});
+    l1=line([x x],[0 yl1],'Color','r','Parent',h.ax{1});
+    set(li,'ButtonDownFn',@startDragFn)
     plot(h.ax{1},x,y,'r+');
     text(x,y+0.1,[' (' num2str(x,'%10.2f') ',' num2str(y) ')'],...
      'Parent',h.ax{1},'VerticalAlignment','Baseline');   
