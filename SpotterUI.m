@@ -68,7 +68,7 @@ handles.f=fig;
         'Units', 'normalized', ...
         'Position', [.06, .03, .92, .27], ...
         'HandleVisibility', 'callback', ...
-        'NextPlot', 'replacechildren',...
+        'NextPlot', 'replacechildren', ...
         'FontSize', 8);
     
     handles.ax{2} = axes( ...
@@ -213,7 +213,7 @@ function open_imStack_Callback(hObject,eventdata)
      UserData.files=files;
      UserData.channels=channels;
      set(h.f,'UserData',UserData);
-     message(h,['Loaded DAPI channel from selected stack set: ' file_index]);
+     ui.message(h,['Loaded DAPI channel from selected stack set: ' file_index]);
      
 end
 %project image stack
@@ -224,12 +224,12 @@ function project_imStack_Callback(hObject,eventdata)
     imagesc(zim,'Parent',h.imStack);colormap gray;
     UserData.I2=zim;
     set(h.f,'Userdata',UserData);
-    message(h,'Z-projection using max()...done');
+    ui.message(h,'Z-projection using max()...done');
 end
 %segment nuclei
 function autoSegment_Callback(hObject,eventdata)
     h=guidata(hObject);
-    message(h,'Performing segmentation, please wait...');
+    ui.message(h,'Performing segmentation, please wait...');
     UserData=get(h.f,'UserData');
     DL=segmentNuclei(UserData.I2);
     %filtler for area and background
@@ -239,7 +239,7 @@ function autoSegment_Callback(hObject,eventdata)
     set(h.f,'Userdata',UserData);
     nuclei_Labels={nuclei.Label};
     set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
-    message(h,'Segmentation ... done, select wrong segmented nuclei -> to be removed');
+    ui.message(h,'Segmentation ... done, select wrong segmented nuclei -> to be removed');
 end
 %remove segmented nuclei
 function rmNuclei_Callback(hObject,eventdata)
@@ -248,20 +248,20 @@ function rmNuclei_Callback(hObject,eventdata)
     cla(h.imStack);
     UserData=get(h.f,'UserData');
     selection=get(h.NucleiList,'Value');
-    message(h,['Removing the folowing nuclei: ' num2str(selection) 'please wait ...']);
+    ui.message(h,['Removing the folowing nuclei: ' num2str(selection) 'please wait ...']);
     [nuclei BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
     UserData.nuclei=nuclei;
     UserData.BW=BW;
     set(h.f,'Userdata',UserData);
     nuclei_Labels={nuclei.Label};
     set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
-    message(h,['Nuclei removed, ' num2str(numel(nuclei)) 'nuclei re-labeled']);
+    ui.message(h,['Nuclei removed, ' num2str(numel(nuclei)) 'nuclei re-labeled']);
 end
 %select segmented nuclei to remove
 function rmNucleiList_Callback(hObject,eventdata)
     h=guidata(hObject);
     selection=get(gcbo,'Value'); 
-    message(h,['Selected nuclei to be removed: ' num2str(selection)]);    
+    ui.message(h,['Selected nuclei to be removed: ' num2str(selection)]);    
 end
 %count dots for selected channels
 function countDots_Callback(hObject, eventdata)
@@ -339,7 +339,6 @@ function loadCalibration_Callback(hObject,eventdata)
         return
     end
 end
-
 %---------Utilities---------------------------------------
 %generate controls for the available channels
     function h = setSettingsControls(h,channels)     
@@ -389,10 +388,7 @@ end
             'BusyAction', 'cancel');
      end
     end
-%Set message in message panel
-function message(h,st)
-set(h.uiMessage,'string',st)
-end
+
 
 
 
