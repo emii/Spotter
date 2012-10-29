@@ -11,6 +11,11 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     blobMeasurements = regionprops(DL2, zim, Iproperties);
     pl=regionprops(DL2, zim,'Perimeter');
     numberOfBlobs = size(blobMeasurements, 1);
+    blobMeasurements(numberOfBlobs).dots=[];
+    blobMeasurements(numberOfBlobs).nd=[];
+    blobMeasurements(numberOfBlobs).thr=[];
+    blobMeasurements(numberOfBlobs).vols=[];
+    
 
     % bwboundaries() returns a cell array, where each cell contains the row/column coordinates for an object in the image.
     % Plot the borders of all the coins on the original grayscale image using the coordinates returned by bwboundaries.
