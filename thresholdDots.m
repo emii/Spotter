@@ -1,14 +1,14 @@
-function nucleiDots = thresholdDots(UserData,h,selection)
+function UserData= thresholdDots(UserData,h,selection)
 
     stacks=UserData.files(selection);
     nuclei=UserData.nuclei;
     tform=UserData.tform;
     threshold_num=UserData.threshold_num;
     BW=UserData.BW;
- 
+    L=UserData.L;
     for ch = 1:numel(stacks),
-        msg=['filtering stack: ' stacks{ch} ' please wait...']
-        ui.message(h,'filtering, please wait')
+        msg=['filtering stack: ' stacks{ch} ' please wait...'];
+        ui.message(h,msg)
         wb = waitbar(0,'Initializing waitbar...');
         stackfile= fullfile(UserData.dirpath,stacks{ch});
         %parse stack and correct shift if tfrom given
@@ -34,7 +34,8 @@ function nucleiDots = thresholdDots(UserData,h,selection)
         %hn=plotBoundaries(zcims,nuclei(5:end),'r',hn);
         imshow(zcims,'Parent',h.imStack);
         utilities.plotBoundaries(zcims,nuclei,'g',h.imStack);
-             
+        
+        L{ch}=zeros(size(cims,2),size(cims,1));
         
         
         for n =1:numel(nuclei)
@@ -51,20 +52,25 @@ function nucleiDots = thresholdDots(UserData,h,selection)
             x=thresholds(t);
             y=nc;
             cvx=cv(t);
-            [dots vols] = getdots(n_ims,x);
-            [dots vols thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,n_ims,snuc,thresholds,thresholdfn,cv);
-            dots = [nuclei(n).dots; dots ch.*ones(num_dots,1)];
-            nd =[nuclei(n).nd; num_dots ch];
-            thr =[nuclei(n).thr; thr ch];
-            vols = [nuclei(n).vols; vols ch.*ones(num_dots,1)];
-            nuclei(n).dots = dots;
-            nuclei(n).nd = nd;
-            nuclei(n).thr = thr;
-            nuclei(n).vols = vols;
+            [dots vols bwl] = getdots(n_ims,x);
+            [dots vols bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thresholds,thresholdfn,cv);
+                bwl=max(bwl,[],3);
+                L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
+                    bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
+
+                dots = [nuclei(n).dots; dots ch.*ones(num_dots,1)];
+                nd =[nuclei(n).nd; num_dots ch];
+                thr =[nuclei(n).thr; thr ch];
+                vols = [nuclei(n).vols; vols ch.*ones(num_dots,1)];
+                nuclei(n).dots = dots;
+                nuclei(n).nd = nd;
+                nuclei(n).thr = thr;
+                nuclei(n).vols = vols;
         end
-        ui.message(h,'Starting with the next channel ...')
+        ui.message(h,'Spots in the channel counted, you can save')
         
     end
-    nucleiDots=nuclei;
+    UserData.nuclei=nuclei;
+    UserData.L=L;
 end
         

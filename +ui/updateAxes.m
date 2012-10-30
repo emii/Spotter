@@ -1,4 +1,4 @@
-function [dots vols x y] =updateAxes(h,x,y,cvx,dots,vols,n_ims,snuc,thresholds,thresholdfn,cv)
+function [dots vols bwl x y] =updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thresholds,thresholdfn,cv)
     
     %h1===========
     
@@ -73,7 +73,7 @@ function [dots vols x y] =updateAxes(h,x,y,cvx,dots,vols,n_ims,snuc,thresholds,t
     
     function stopDragFcn(varargin)
         set(h.f,'WindowButtonMotionFcn','');
-        [dots vols]=getdots(n_ims,x);
+        [dots vols bwl]=getdots(n_ims,x);
         set(p3,'XData',dots(:,1),'YData',dots(:,2));
   
     end

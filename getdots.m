@@ -1,4 +1,4 @@
-function [dots vols]= getdots(n_ims,thr)    
+function [dots vols bwl]= getdots(n_ims,thr)    
     bwl = n_ims > thr;
     [lab,num_dots] = bwlabeln(bwl);
     props=regionprops(lab,'Centroid','Area');

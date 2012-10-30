@@ -193,7 +193,6 @@ handles.f=fig;
     guidata(fig, handles);
     % use guidata only for handles related to the actual user interface
     % use appdata to store the actual data
-    UserData=get(fig,'UserData');
     %TODO initialize values
 end
 % --- Executes just before imagem is made visible------------------
@@ -203,16 +202,17 @@ end
 %open image stack
 function open_imStack_Callback(hObject,eventdata)
      h=guidata(hObject);
-     UserData=get(h.f,'UserData');
+     UserData=[];
      [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)');
-        file_index=imname((end-6):(end-4));        
+     if imfilter_index   
+     file_index=imname((end-6):(end-4));        
         [files,channels]=utilities.all_channel_names(impath,file_index);
         set(h.ChannelList,'String',files); 
-     if imfilter_index
+     
          ims=parse_stack([impath 'dapi_' file_index '.tif'],1,40);
          front=ims(:,:,1);
          imagesc(front,'Parent',h.imStack);colormap gray;axis square;axis off;axis image
-     end
+     
     h=setSettingsControls(h,channels);
     %store the hanldes in guidata
      guidata(h.f,h);
@@ -223,8 +223,15 @@ function open_imStack_Callback(hObject,eventdata)
      UserData.files=files;
      UserData.channels=channels;
      UserData.tform=cell(numel(channels),1);
+     UserData.L=cell(numel(channels),1);
+     dt=clock;
+     dt=fix(dt);
+     UserData.dt=datestr(dt,'dd-mm-yyyy-HH-MM');
      set(h.f,'UserData',UserData);
      ui.message(h,['Loaded DAPI channel from selected stack set: ' file_index]);
+     else
+         return 
+     end
      
 end
 %project image stack
@@ -280,11 +287,10 @@ function countDots_Callback(hObject, eventdata)
     UserData=get(h.f,'UserData');
     UserData.threshold_num=100;
     selection=get(h.ChannelList,'Value');
-    nucleiDots=thresholdDots(UserData,h,selection);
+    UserData=thresholdDots(UserData,h,selection);
 %     [UData adots]=countDots(UserData,h,selection,);
 %     UserData.UData=UData;
 %     UserData.dots=adots;
-    UserData.nuclei=nucleiDots;
     set(h.f,'Userdata',UserData);
     
 end
@@ -292,7 +298,11 @@ end
 function saveCounts_Callback(hObject,eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
-    [svName,svPath,FilterIndex] = uiputfile('*.mat','Save your calibration',[UserData.dirpath 'UserData' UserData.index]);
+    dt=clock;
+    dt=fix(dt);
+    dt=datestr(dt,'ddmmyyyy');
+    [svName,svPath,FilterIndex] = uiputfile('*.mat','Save your calibration',...
+        [UserData.dirpath 'Stack_' UserData.index '_' dt]);
     if FilterIndex
         UserData.I=UserData.I2;
         svFullPath=fullfile(svPath, svName);
