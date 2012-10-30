@@ -202,7 +202,13 @@ end
 %open image stack
 function open_imStack_Callback(hObject,eventdata)
      h=guidata(hObject);
-     UserData=[];
+     ui.message(h,'Open Image stack set')
+     UserData=[];cla(h.ax{1},'reset');cla(h.ax{2},'reset');
+     
+     cla(h.ax{3},'reset'); cla(h.imStack);delete(get(h.panelSettings,'Children'));
+     set(h.ChannelList,'String','');
+     set(h.NucleiList,'String','','Value',[]);
+     
      [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)');
      if imfilter_index   
      file_index=imname((end-6):(end-4));        
