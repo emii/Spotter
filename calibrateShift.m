@@ -46,7 +46,7 @@ end
         % well aligned points should appear as a single yellow point
         % bad aligned points show up as points with the two distinct colors
 
-        ha = ui.tight_subplot(1,2,[.01 .01],[.01 .01],[.01 .01]);
+        ha = utilities.tight_subplot(1,2,[.01 .01],[.01 .01],[.01 .01]);
 
         axes(ha(1));
         OL = zeros(size(dapi, 1), size(dapi, 2), 3);

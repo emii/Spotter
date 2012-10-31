@@ -90,11 +90,13 @@ figure;
 
 [ni xout] = hist(nd_a594,50);
 bar(xout,ni,'FaceColor',[.6 .6 .6])
+title('A594')
 
 figure;
 
 [ni xout] = hist(nd_cy5,50);
 bar(xout,ni,'FaceColor',[.6 .6 .6])
+title('Cy5')
 
 
 
