@@ -6,6 +6,10 @@ function ims=parse_stack(filename,first,last,tform)
 % n*m*S double 3D array if tform is specified, the stack is spatially
 % transformed.
 
+imheight=1024;
+imwidth=1024;
+
+
 
 info=imfinfo(filename);
 if last>length(info),
@@ -16,7 +20,7 @@ if nargin < 2
     stack = imread(filename);
 else
     if nargin <4
-        stack=zeros(1024,1024,last-first+1);
+        stack=zeros(imwidth,imheight,last-first+1);
         
         for i=first:last,
             stack(:,:,i) = imread(filename,i,'info',info);%returns double
@@ -24,7 +28,7 @@ else
         end
     
     else
-        stack=zeros(1024,1024,last-first+1);
+        stack=zeros(imwidth,imheight,last-first+1);
         
         for i=first:last,
             tmp = imread(filename,i,'info',info);%returns double

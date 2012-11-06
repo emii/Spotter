@@ -14,7 +14,8 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     blobMeasurements(numberOfBlobs).dots=[];
     blobMeasurements(numberOfBlobs).nd=[];
     blobMeasurements(numberOfBlobs).thr=[];
-    blobMeasurements(numberOfBlobs).vols=[];
+    blobMeasurements(numberOfBlobs).vol=[];
+    blobMeasurements(numberOfBlobs).intensity=[];
     
 
     % bwboundaries() returns a cell array, where each cell contains the row/column coordinates for an object in the image.

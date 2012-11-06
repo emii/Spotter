@@ -308,8 +308,9 @@ function saveCounts_Callback(hObject,eventdata)
     dt=fix(dt);
     dt=datestr(dt,'ddmmyyyy');
     [svName,svPath,FilterIndex] = uiputfile('*.mat','Save your calibration',...
-        [UserData.dirpath 'Stack_' UserData.index '_' dt]);
+        [UserData.dirpath 'Counts_' UserData.index '_' dt]);
     if FilterIndex
+        %TODO calculate dpi intensity?
         UserData.I=UserData.I2;
         svFullPath=fullfile(svPath, svName);
         save(svFullPath,'-mat','UserData')

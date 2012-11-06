@@ -9,7 +9,7 @@ function UserData= thresholdDots(UserData,h,selection)
     for ch = 1:numel(stacks),
         msg=['filtering stack: ' stacks{ch} ' please wait...'];
         ui.message(h,msg)
-        wb = waitbar(0,'Initializing waitbar...');
+        wb = waitbar(0,'Parsing and filtering and stuff...');
         stackfile= fullfile(UserData.dirpath,stacks{ch});
         %parse stack and correct shift if tfrom given
         if ~isempty(tform{ch})
@@ -49,11 +49,13 @@ function UserData= thresholdDots(UserData,h,selection)
             thresholdfn = multithreshstack(n_ims,threshold_num);
             thresholds = (1:threshold_num)/threshold_num;
             [t nc cv]= auto_thresholding(thresholdfn,5,0.1);
-            x=thresholds(t);
-            y=nc;
+            mm='thresholded:'
+            x=thresholds(t)
+            y=nc
+            mm='rounded:'
             cvx=cv(t);
-            [dots vols bwl] = getdots(n_ims,x);
-            [dots vols bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thresholds,thresholdfn,cv);
+            [dots vols intensity bwl] = getdots(n_ims,x);
+            [dots vols intensity bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv);
                 bwl=max(bwl,[],3);
                 L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
                     bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
@@ -61,11 +63,14 @@ function UserData= thresholdDots(UserData,h,selection)
                 dots = [nuclei(n).dots; dots ch.*ones(num_dots,1)];
                 nd =[nuclei(n).nd; num_dots ch];
                 thr =[nuclei(n).thr; thr ch];
-                vols = [nuclei(n).vols; vols ch.*ones(num_dots,1)];
+                vols = [nuclei(n).vol; vols ch.*ones(num_dots,1)];
+                intensities = [nuclei(n).intensity; intensity ch.*ones(num_dots,1)];
                 nuclei(n).dots = dots;
                 nuclei(n).nd = nd;
                 nuclei(n).thr = thr;
-                nuclei(n).vols = vols;
+                nuclei(n).vol = vols;
+                nuclei(n).intensity = intensities;
+                
         end
         ui.message(h,'Spots in the channel counted, you can save')
         

@@ -1,4 +1,4 @@
-function [dots vols bwl x y] =updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thresholds,thresholdfn,cv)
+function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv)
     
     %h1===========
     
@@ -33,6 +33,8 @@ function [dots vols bwl x y] =updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thre
     
     %h3============
     
+    cm=brighten(jet(40),-.5);
+    
     delete(get(h.ax{3},'Children'));
     set(h.ax{3},'NextPlot','add');
     
@@ -41,8 +43,9 @@ function [dots vols bwl x y] =updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thre
     utilities.plotBoundaries(zcnims,snuc,'r',h.ax{3});drawnow; 
     axis(h.ax{3},'image')
     
-    p3=plot(h.ax{3},dots(:,1),dots(:,2),'ro','MarkerSize',6);  
-
+    
+    %p3=plot(h.ax{3},dots(:,1),dots(:,2),'Marker','o','MarkerSize',6,'MarkerEdgeColor',cm(dots(:,3),:));  
+    p3=scatter(h.ax{3},dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
 
     
     set(l1,'ButtonDownFcn',@startDragFcn);
@@ -62,7 +65,9 @@ function [dots vols bwl x y] =updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thre
         elseif x<0.01
             x=0.01;
         end
+        x= thresholds(round(x*100));
         y = thresholdfn(round(x*100)); 
+        
         
         set(l1,'XData',x*[1 1])
         set(t1,'Position',[x,yl1*0.5],'String',...
@@ -73,8 +78,8 @@ function [dots vols bwl x y] =updateAxes(h,x,y,cvx,dots,vols,bwl,n_ims,snuc,thre
     
     function stopDragFcn(varargin)
         set(h.f,'WindowButtonMotionFcn','');
-        [dots vols bwl]=getdots(n_ims,x);
-        set(p3,'XData',dots(:,1),'YData',dots(:,2));
+        [dots vols intensity bwl]=getdots(n_ims,x);
+        set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
   
     end
     waitfor(h.countNext,'UserData',1)

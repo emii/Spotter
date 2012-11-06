@@ -99,19 +99,7 @@ bar(xout,ni,'FaceColor',[.6 .6 .6])
 title('Cy5')
 
 
-
-
-
-
-
-
-
-
 end
-
-
-
-
 
 
 
