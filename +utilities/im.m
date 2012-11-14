@@ -15,6 +15,6 @@ ax= axes('Parent', fig,'Units', 'normalized', ...
         'Position', [.0, .0, 1.0, 1.0]);
 axis(ax,'off','image','ij','square');
 if nargin>0
-imshow(ima,'InitialMagnification','Fit','Parent',ax)
+imshow(ima,[],'InitialMagnification','Fit','Parent',ax)
 end
 end

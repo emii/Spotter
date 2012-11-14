@@ -214,8 +214,10 @@ function open_imStack_Callback(hObject,eventdata)
      file_index=imname((end-6):(end-4));        
         [files,channels]=utilities.all_channel_names(impath,file_index);
         set(h.ChannelList,'String',files); 
-     
-         ims=parse_stack([impath 'dapi_' file_index '.tif'],1,40);
+         
+        
+         info=imfinfo([impath 'dapi_' file_index '.tif']);   
+         ims=parse_stack([impath 'dapi_' file_index '.tif'],1,numel(info));
          front=ims(:,:,1);
          imagesc(front,'Parent',h.imStack);colormap gray;axis square;axis off;axis image
      

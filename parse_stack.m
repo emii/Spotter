@@ -6,12 +6,16 @@ function ims=parse_stack(filename,first,last,tform)
 % n*m*S double 3D array if tform is specified, the stack is spatially
 % transformed.
 
-imheight=1024;
-imwidth=1024;
+
+
+
 
 
 
 info=imfinfo(filename);
+imheight=info(1).Width;
+imwidth=info(1).Height;
+
 if last>length(info),
     last=length(info);
 end

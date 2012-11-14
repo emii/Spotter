@@ -13,10 +13,12 @@ function UserData= thresholdDots(UserData,h,selection)
         stackfile= fullfile(UserData.dirpath,stacks{ch});
         %parse stack and correct shift if tfrom given
         if ~isempty(tform{ch})
-           cims=parse_stack(stackfile,1,50,tform{ch});
+           info=imfinfo(stackfile);
+           cims=parse_stack(stackfile,1,numel(info),tform{ch});
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         else
-           cims=parse_stack(stackfile,1,50);
+           info=imfinfo(stackfile);
+           cims=parse_stack(stackfile,1,numel(info));
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         end
         
@@ -49,10 +51,9 @@ function UserData= thresholdDots(UserData,h,selection)
             thresholdfn = multithreshstack(n_ims,threshold_num);
             thresholds = (1:threshold_num)/threshold_num;
             [t nc cv]= auto_thresholding(thresholdfn,5,0.1);
-            mm='thresholded:'
-            x=thresholds(t)
-            y=nc
-            mm='rounded:'
+            x=thresholds(t);
+            y=nc;
+      
             cvx=cv(t);
             [dots vols intensity bwl] = getdots(n_ims,x);
             [dots vols intensity bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv);

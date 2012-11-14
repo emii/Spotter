@@ -33,7 +33,7 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     
     %h3============
     
-    cm=brighten(jet(40),-.5);
+    cm=brighten(jet(50),-.5);
     
     delete(get(h.ax{3},'Children'));
     set(h.ax{3},'NextPlot','add');
