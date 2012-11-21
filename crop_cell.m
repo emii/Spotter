@@ -32,6 +32,8 @@ for j=1:size(ims,3)
     Y1=ims(:,:,j);%NOTE: optimize this method!
     YY=imcrop(Y1,RECT);
     YY=YY.*BWsmooth;
+    if ~isempty(min(min(YY(YY~=0))))
     YY(YY==0)=min(min(YY(YY~=0)));%make the background the minimum from what is inside the mask?
+    end
     ims2(:,:,j)=YY;
 end

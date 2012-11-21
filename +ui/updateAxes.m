@@ -39,8 +39,8 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     set(h.ax{3},'NextPlot','add');
     
     zcnims=zproject(n_ims);
-    imshow(zcnims,'Parent',h.ax{3});
-    utilities.plotBoundaries(zcnims,snuc,'r',h.ax{3});drawnow; 
+    imshow(zcnims,[0 1],'Parent',h.ax{3});
+    utilities.plotBoundaries(zcnims,snuc,'r',h.ax{3},0);drawnow; 
     axis(h.ax{3},'image')
     
     
@@ -87,6 +87,6 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     set(h.f,'WindowButtonUpFcn','');
     set(h.ax{1},'NextPlot','replaceChildren');
     set(h.ax{2},'NextPlot','replaceChildren');
-    set(h.ax{3},'NextPlot','add');
+    set(h.ax{3},'NextPlot','replaceChildren');
     set(h.countNext,'UserData',0)
 end

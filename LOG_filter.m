@@ -5,6 +5,7 @@ function outims = LOG_filter(ims,N,sigma)
 % on the pixel size of your camera and your microscope's
 % optical characteristics.
 H = -fspecial('log',N,sigma);
+%H = -utilities.fspecial3('log',N,sigma);
 
 % Here, we amplify the signal by making the filter "3-D"
 H = 1/3*cat(3,H,H,H);

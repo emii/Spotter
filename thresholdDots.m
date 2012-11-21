@@ -1,4 +1,10 @@
 function UserData= thresholdDots(UserData,h,selection)
+% some parameters
+    CV_width = 5;
+    CV_offset = 0.01;
+    LOG_Size = 15;
+    LOG_Sigma = 1.3;
+
 
     stacks=UserData.files(selection);
     nuclei=UserData.nuclei;
@@ -27,7 +33,7 @@ function UserData= thresholdDots(UserData,h,selection)
         %ax=utilities.plotBoundaries(zcims,nuclei,'g');drawnow;
         %waitfor(ax)
         waitbar(0.5,wb,['Filtering for ' stacks{ch}])
-        cims = LOG_filter(cims,10,1.5);
+        cims = LOG_filter(cims,LOG_Size,LOG_Sigma);
         waitbar(0.9,wb,['Almost Done ' stacks{ch}])
         cims = cims/max(cims(:));
         close(wb)
@@ -42,19 +48,19 @@ function UserData= thresholdDots(UserData,h,selection)
         
         for n =1:numel(nuclei)
             ui.message(h,['Drag red line to select threshold for nuclei: ' num2str(n)])
-            utilities.plotBoundaries(zcims,nuclei,'g',h.imStack);
-            utilities.plotBoundaries(zcims,nuclei(n),'r',h.imStack);
+            utilities.plotBoundaries(zcims,nuclei,'g',h.imStack,0);
+            utilities.plotBoundaries(zcims,nuclei(n),'r',h.imStack,0);
             [n_ims snuc]=crop_cell(cims,BW,nuclei(n));
 
-            n_ims = n_ims/max(n_ims(:));%normalize to single cell
+            %n_ims = n_ims/max(n_ims(:));%normalize to single cell
 
             thresholdfn = multithreshstack(n_ims,threshold_num);
             thresholds = (1:threshold_num)/threshold_num;
-            [t nc cv]= auto_thresholding(thresholdfn,5,0.1);
+            [t nc cv]= auto_thresholding(thresholdfn,CV_width,CV_offset);
             x=thresholds(t);
             y=nc;
-      
             cvx=cv(t);
+            
             [dots vols intensity bwl] = getdots(n_ims,x);
             [dots vols intensity bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv);
                 bwl=max(bwl,[],3);
