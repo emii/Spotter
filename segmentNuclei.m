@@ -92,6 +92,7 @@ end
 
 DL=bwlabel(DL);
 DL=imclearborder(DL);
+DL=bwlabel(DL);
 
 
 

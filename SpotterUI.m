@@ -306,6 +306,8 @@ end
 function saveCounts_Callback(hObject,eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
+    ui.message(h,'Wait, calculating DAPI intensity...');
+    UserData=setDapiIntensity(UserData);
     dt=clock;
     dt=fix(dt);
     dt=datestr(dt,'ddmmyyyy');

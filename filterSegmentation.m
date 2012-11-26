@@ -1,13 +1,16 @@
 function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
 %%get blobmesurements and plot the segmentation result
-    if nargin ==4
+    if nargin == 4
         for i = bad
             DL2(DL2==i)=0;
         end
         DL2=bwlabel(DL2);
     end
+       
+
+    
     % Get all the blob properties.  Can only pass in originalImage in version R2008a and later.
-    Iproperties={'MeanIntensity','Area','Centroid','PixelIdxList','PixelList'};
+    Iproperties={'Area','Centroid','PixelIdxList','PixelList'};
     blobMeasurements = regionprops(DL2, zim, Iproperties);
     pl=regionprops(DL2, zim,'Perimeter');
     numberOfBlobs = size(blobMeasurements, 1);
@@ -16,6 +19,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     blobMeasurements(numberOfBlobs).thr=[];
     blobMeasurements(numberOfBlobs).vol=[];
     blobMeasurements(numberOfBlobs).intensity=[];
+    blobMeasurements(numberOfBlobs).Dapi=[];
     
 
     % bwboundaries() returns a cell array, where each cell contains the row/column coordinates for an object in the image.
@@ -36,10 +40,10 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     filterArea=blobECD;
     thrup=40000;thrlow=500;
     % Print header line in the command window.
-    fprintf(1,'Blob #      Mean Intensity  Area   Perimeter    Centroid       Diameter\n');
+    fprintf(1,'Blob #    Area   Perimeter    Centroid       Diameter\n');
     % Loop over all blobs printing their measurements to the command window.
     for k = 1 : numberOfBlobs           % Loop through all blobs.
-        meanGL = blobMeasurements(k).MeanIntensity; % Mean again, but only for version >= R2008a
+        %meanGL = blobMeasurements(k).MeanIntensity; % Mean again, but only for version >= R2008a
         blobArea = blobMeasurements(k).Area;		% Get area.
         if (blobArea>thrup || blobArea<thrlow)
             filterArea(k)=k;
@@ -53,8 +57,11 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
         blobPerimeter = pl(k).Perimeter;		% Get perimeter.
         blobCentroid = blobMeasurements(k).Centroid;		% Get centroid.
         blobECD(k) = sqrt(4 * blobArea / pi);					% Compute ECD - Equivalent Circular Diameter.
-        fprintf(1,'#%2d %17.1f %11.1f %8.1f %8.1f %8.1f % 8.1f\n', k, meanGL, blobArea, blobPerimeter, blobCentroid, blobECD(k));
+        fprintf(1,'#%2d %11.1f %8.1f %8.1f %8.1f %8.1f \n', k, blobArea, blobPerimeter, blobCentroid, blobECD(k));
         text(blobCentroid(1) + labelShiftX, blobCentroid(2), num2str(k), 'FontSize', 14, 'FontWeight', 'Bold'); 
+    %calculate reference channel intensity
+   
+    
     end
     clean=filterArea(filterArea>0);
     if ~isempty(clean)

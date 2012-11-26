@@ -5,7 +5,7 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     delete(get(h.ax{1},'Children'));
     set(h.ax{1},'NextPlot','add');
     
-    yl1=2*y;
+    yl1=30;
     
     plot(h.ax{1},thresholds,thresholdfn,'Color',[.6 .6 .6]);
     l1 = line([x x],[0 yl1],'Color','r','Parent',h.ax{1},'LineWidth',2);
@@ -44,8 +44,8 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     axis(h.ax{3},'image')
     
     
-    %p3=plot(h.ax{3},dots(:,1),dots(:,2),'Marker','o','MarkerSize',6,'MarkerEdgeColor',cm(dots(:,3),:));  
-    p3=scatter(h.ax{3},dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+    p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
+    %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
 
     
     set(l1,'ButtonDownFcn',@startDragFcn);
@@ -79,7 +79,9 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     function stopDragFcn(varargin)
         set(h.f,'WindowButtonMotionFcn','');
         [dots vols intensity bwl]=getdots(n_ims,x);
-        set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+        set(p3,'XData',dots(:,1),'YData',dots(:,2));
+        %set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+        
   
     end
     waitfor(h.countNext,'UserData',1)
