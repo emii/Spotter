@@ -20,10 +20,22 @@ function UserData= thresholdDots(UserData,h,selection)
         if ~isempty(tform{ch})
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info),tform{ch});
+           %=======
+           aa=sort(cims(:));
+           b1=size(aa,1)*0.999;
+           c1=aa(round(b1));
+           cims(cims>c1)=c1;
+           %=======
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         else
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info));
+           %========
+           aa=sort(cims(:));
+           b1=size(aa,1)*0.999;
+           c1=aa(round(b1));
+           cims(cims>c1)=c1;
+           %========
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         end
         

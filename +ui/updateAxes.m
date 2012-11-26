@@ -5,7 +5,7 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     delete(get(h.ax{1},'Children'));
     set(h.ax{1},'NextPlot','add');
     
-    yl1=30;
+    yl1=50;
     
     plot(h.ax{1},thresholds,thresholdfn,'Color',[.6 .6 .6]);
     l1 = line([x x],[0 yl1],'Color','r','Parent',h.ax{1},'LineWidth',2);
