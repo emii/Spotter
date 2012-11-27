@@ -2,8 +2,8 @@ function UserData= thresholdDots(UserData,h,selection)
 % some parameters
     CV_width = 5;
     CV_offset = 0.1;
-    LOG_Size = 11;%15
-    LOG_Sigma = 1.4;%1.3
+    LOG_Size = [11 11 7];%15
+    LOG_Sigma = [1.1 1.1 1];%1.3
 
     stacks=UserData.files(selection);
     nuclei=UserData.nuclei;

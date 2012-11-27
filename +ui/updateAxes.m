@@ -44,8 +44,8 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     axis(h.ax{3},'image')
     
     
-    p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
-    %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+    %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
+    p3=scatter(h.ax{3},dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
 
     
     set(l1,'ButtonDownFcn',@startDragFcn);
@@ -79,8 +79,8 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     function stopDragFcn(varargin)
         set(h.f,'WindowButtonMotionFcn','');
         [dots vols intensity bwl]=getdots(n_ims,x);
-        set(p3,'XData',dots(:,1),'YData',dots(:,2));
-        %set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+        %set(p3,'XData',dots(:,1),'YData',dots(:,2));
+        set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
         
   
     end

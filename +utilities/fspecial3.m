@@ -94,7 +94,7 @@ switch type
         
     case 'log'
         %sig = siz/(4*sqrt(2*log(2)));
-        sig = repmat(sig,1,3);
+        %sig = repmat(sig,1,3);
         siz   = (siz-1)/2;
         [x,y,z] = ndgrid(-siz(1):siz(1),-siz(2):siz(2),-siz(3):siz(3));
         h = exp(-(x.*x/2/sig(1)^2 + y.*y/2/sig(2)^2 + z.*z/2/sig(3)^2));
