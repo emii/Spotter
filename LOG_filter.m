@@ -9,7 +9,7 @@ H = -utilities.fspecial3('log',N,sigma);
 %http://www.biomecardio.com/matlab/fspecial3.html#6
 
 % Here, we amplify the signal by making the filter "3-D"
-%H = 1/5*cat(3,H,H,H,H,H);
+%H = 1/7*cat(3,H,H,H,H,H,H,H);
 
 % Apply the filter
 outims = imfilter(ims,H,'replicate');

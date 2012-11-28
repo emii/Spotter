@@ -3,7 +3,7 @@ function UserData= thresholdDots(UserData,h,selection)
     CV_width = 5;
     CV_offset = 0.1;
     LOG_Size = [11 11 7];%15
-    LOG_Sigma = [1.1 1.1 1];%1.3
+    LOG_Sigma = [1.4 1.4 1.1];%1.3
 
     stacks=UserData.files(selection);
     nuclei=UserData.nuclei;
@@ -21,20 +21,20 @@ function UserData= thresholdDots(UserData,h,selection)
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info),tform{ch});
            %=======
-           aa=sort(cims(:));
-           b1=size(aa,1)*0.999;
-           c1=aa(round(b1));
-           cims(cims>c1)=c1;
+%            aa=sort(cims(:));
+%            b1=size(aa,1)*0.999;
+%            c1=aa(round(b1));
+%            cims(cims>c1)=c1;
            %=======
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         else
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info));
            %========
-           aa=sort(cims(:));
-           b1=size(aa,1)*0.999;
-           c1=aa(round(b1));
-           cims(cims>c1)=c1;
+%            aa=sort(cims(:));
+%            b1=size(aa,1)*0.999;
+%            c1=aa(round(b1));
+%            cims(cims>c1)=c1;
            %========
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         end
