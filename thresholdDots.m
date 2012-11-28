@@ -54,46 +54,48 @@ function UserData= thresholdDots(UserData,h,selection)
         imshow(zcims,'Parent',h.imStack);
         utilities.plotBoundaries(zcims,nuclei,'g',h.imStack);
         
-        L{ch}=zeros(size(cims,2),size(cims,1));
+        %L{ch}=zeros(size(cims,2),size(cims,1));
         
         
-        for n =1:numel(nuclei)
-            ui.message(h,['Drag red line to select threshold for nuclei: ' num2str(n)])
+            ui.message(h,['Drag red line to select threshold for nuclei: '])
             utilities.plotBoundaries(zcims,nuclei,'g',h.imStack,0);
-            utilities.plotBoundaries(zcims,nuclei(n),'r',h.imStack,0);
-            [n_ims snuc]=crop_cell(cims,BW,nuclei(n));
+            %utilities.plotBoundaries(zcims,nuclei(n),'r',h.imStack,0);
+            %[n_ims snuc]=crop_cell(cims,BW,nuclei(n));
 
             %n_ims = n_ims/max(n_ims(:));%normalize to single cell
-
-            thresholdfn = multithreshstack(n_ims,threshold_num);
+            BW1=BW;
+            BW1(BW1>0)=1;
+            cims=cims.*repmat(BW1,[1,1,size(cims,3)]);
+            thresholdfn = multithreshstack(cims,threshold_num);
             thresholds = (1:threshold_num)/threshold_num;
             [t nc cv]= auto_thresholding(thresholdfn,CV_width,CV_offset);
             x=thresholds(t);
             y=nc;
             cvx=cv(t);
             
-            [dots vols intensity bwl] = getdots(n_ims,x);
-            [dots vols intensity bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv);
-                bwl=max(bwl,[],3);
-                L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
-                    bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
+            [dots vols intensity bwl] = getdots(cims,x);
 
-                dots = [nuclei(n).dots; dots ch.*ones(num_dots,1)];
-                nd =[nuclei(n).nd; num_dots ch];
-                thr =[nuclei(n).thr; thr ch];
-                vols = [nuclei(n).vol; vols ch.*ones(num_dots,1)];
-                intensities = [nuclei(n).intensity; intensity ch.*ones(num_dots,1)];
-                nuclei(n).dots = dots;
-                nuclei(n).nd = nd;
-                nuclei(n).thr = thr;
-                nuclei(n).vol = vols;
-                nuclei(n).intensity = intensities;
+            [dots vols intensity bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,cims,nuclei,thresholds,thresholdfn,cv,BW,nuclei);
+%                 bwl=max(bwl,[],3);
+%                 L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
+%                     bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
+% 
+%                 dots = [nuclei(n).dots; dots ch.*ones(num_dots,1)];
+%                 nd =[nuclei(n).nd; num_dots ch];
+%                 thr =[nuclei(n).thr; thr ch];
+%                 vols = [nuclei(n).vol; vols ch.*ones(num_dots,1)];
+%                 intensities = [nuclei(n).intensity; intensity ch.*ones(num_dots,1)];
+%                 nuclei(n).dots = dots;
+%                 nuclei(n).nd = nd;
+%                 nuclei(n).thr = thr;
+%                 nuclei(n).vol = vols;
+%                 nuclei(n).intensity = intensities;
                 
         end
         ui.message(h,'Spots in the channel counted, you can save')
         
-    end
-    UserData.nuclei=nuclei;
-    UserData.L=L;
+    %end
+    %UserData.nuclei=nuclei;
+    %UserData.L=L;
 end
         

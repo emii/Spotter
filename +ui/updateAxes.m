@@ -1,11 +1,12 @@
-function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv)
+function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv,BW,nuclei)
     
     %h1===========
     
     delete(get(h.ax{1},'Children'));
     set(h.ax{1},'NextPlot','add');
     
-    yl1=50;
+    %yl1=max(thresholdfn)+max(thresholdfn)*0.1;
+    yl1=2000;
     
     plot(h.ax{1},thresholds,thresholdfn,'Color',[.6 .6 .6]);
     l1 = line([x x],[0 yl1],'Color','r','Parent',h.ax{1},'LineWidth',2);
@@ -31,30 +32,101 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     set(h.ax{2},'XLim',[0 1]);
     set(h.ax{2},'YLim',[0 yl2]);
     
-    %h3============
+    %imStack============
     
     cm=brighten(jet(50),-.5);
     
+    delete(get(h.imStack,'Children'));
+    set(h.imStack,'NextPlot','add');
+    
+    znims=zproject(n_ims);
+    hf=imagesc(znims,'Parent',h.imStack);
+    utilities.plotBoundaries(znims,snuc,'g',h.imStack,0);drawnow; 
+    
+    
+    p3=scatter(h.imStack,dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
+    %p3=scatter(h.imStack,dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+    
+   %h3=================
+
     delete(get(h.ax{3},'Children'));
     set(h.ax{3},'NextPlot','add');
-    
-    zcnims=zproject(n_ims);
+
+    [nn_ims snuc]=crop_cell(znims,BW,nuclei(1));
+    zcnims=zproject(nn_ims);
     imshow(zcnims,[0 1],'Parent',h.ax{3});
     utilities.plotBoundaries(zcnims,snuc,'r',h.ax{3},0);drawnow; 
     axis(h.ax{3},'image')
     
+    xi=nuclei(1).PixelList(:,1);
+    yi=nuclei(1).PixelList(:,2);
+    RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
     
+    x1=round(dots(:,2));y1=round(dots(:,1));
+    dots_nuc=BW(sub2ind(size(BW), x1, y1));
+    
+    dots_idx=dots_nuc==1;
+    ndots=dots(dots_idx,:);
+    ndots=ndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1);
+
+
     %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
-    p3=scatter(h.ax{3},dots(:,1),dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+    scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
+
 
     
+    
+    
+    set(hf,'ButtonDownFcn',@plotSingleNuclei)
     set(l1,'ButtonDownFcn',@startDragFcn);
-    set(h.f,'WindowButtonUpFcn',@stopDragFcn)
+    %set(h.f,'WindowButtonUpFcn',@stopDragFcn)
+    
+ 
+    
+    
+    
+    function plotSingleNuclei(varargin)
+
+        xy = get(h.imStack,'CurrentPoint');
+        nuc = BW(round(xy(1,2)),round(xy(1,1)));
+        if nuc ==0;
+            return
+        end
+        [nn_ims snuc]=crop_cell(znims,BW,nuclei(nuc));
+        xi=nuclei(nuc).PixelList(:,1);
+        yi=nuclei(nuc).PixelList(:,2);
+        RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+
+        %h3=================
+
+        delete(get(h.ax{3},'Children'));
+        set(h.ax{3},'NextPlot','add');
+
+
+        zcnims=zproject(nn_ims);
+        imshow(zcnims,[0 1],'Parent',h.ax{3});
+        utilities.plotBoundaries(zcnims,snuc,'r',h.ax{3},0); 
+        axis(h.ax{3},'image')
+        
+        dots_idx=dots_nuc==nuc;
+        ndots=dots(dots_idx,:);
+        ndots=ndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1);
+        
+
+        %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
+        scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
+    end
+    
+    
+    
+    
     
     
     function startDragFcn(varargin)
         
         set(h.f,'WindowButtonMotionFcn',@draggingFcn);
+        set(h.f,'WindowButtonUpFcn',@stopDragFcn);
+        set(hf,'ButtonDownFcn','');
     end
 
     function draggingFcn(varargin)
@@ -78,17 +150,28 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
     
     function stopDragFcn(varargin)
         set(h.f,'WindowButtonMotionFcn','');
+        set(h.f,'WindowButtonUpFcn','');
         [dots vols intensity bwl]=getdots(n_ims,x);
-        %set(p3,'XData',dots(:,1),'YData',dots(:,2));
-        set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
-        
-  
+        set(p3,'XData',dots(:,1),'YData',dots(:,2));
+        %set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
+        x1=round(dots(:,2));y1=round(dots(:,1));
+        dots_nuc=BW(sub2ind(size(BW), x1, y1));
+        set(hf,'ButtonDownFcn',@plotSingleNuclei);
     end
+    
+
+    
+        
+
+
     waitfor(h.countNext,'UserData',1)
+    
     set(l1,'ButtonDownFcn','');
     set(h.f,'WindowButtonUpFcn','');
+    set(hf,'ButtonDownFcn','');
     set(h.ax{1},'NextPlot','replaceChildren');
     set(h.ax{2},'NextPlot','replaceChildren');
+    set(h.imStack,'NextPlot','replaceChildren');
     set(h.ax{3},'NextPlot','replaceChildren');
     set(h.countNext,'UserData',0)
 end
