@@ -5,13 +5,13 @@ function UserData= thresholdDots(UserData,h,selection)
     LOG_Size = [11 11 7];%15
     LOG_Sigma = [1.4 1.4 1.1];%1.3
 
-    stacks=UserData.files(selection);
+    stacks=UserData.files;
     nuclei=UserData.nuclei;
     tform=UserData.tform;
     threshold_num=UserData.threshold_num;
     BW=UserData.BW;
     L=UserData.L;
-    for ch = 1:numel(stacks),
+    for ch = selection,
         msg=['filtering stack: ' stacks{ch} ' please wait...'];
         ui.message(h,msg)
         wb = waitbar(0,'Parsing and filtering and stuff...');
@@ -75,10 +75,10 @@ function UserData= thresholdDots(UserData,h,selection)
             
             [dots vols intensity bwl] = getdots(cims,x);
 
-            [dots vols intensity bwl thr num_dots]= ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,cims,nuclei,thresholds,thresholdfn,cv,BW,nuclei);
-%                 bwl=max(bwl,[],3);
-%                 L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
-%                     bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
+            [nuclei,bwl] = ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,cims,nuclei,thresholds,thresholdfn,cv,BW,nuclei,ch);
+                 L{ch}=max(bwl,[],3);
+                 %L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
+                  %  bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
 % 
 %                 dots = [nuclei(n).dots; dots ch.*ones(num_dots,1)];
 %                 nd =[nuclei(n).nd; num_dots ch];
@@ -91,11 +91,11 @@ function UserData= thresholdDots(UserData,h,selection)
 %                 nuclei(n).vol = vols;
 %                 nuclei(n).intensity = intensities;
                 
-        end
+        %end
         ui.message(h,'Spots in the channel counted, you can save')
         
-    %end
-    %UserData.nuclei=nuclei;
-    %UserData.L=L;
+    end
+    UserData.nuclei=nuclei;
+    UserData.L=L;
 end
         

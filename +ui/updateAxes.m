@@ -1,4 +1,4 @@
-function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv,BW,nuclei,ch)
+function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv,BW,nuclei,ch)
     
     %h1===========
     
@@ -174,11 +174,11 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
         
         dots_idx=dots_nuc==n;
         ndots=dots(dots_idx,:);
-        drow=[sndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1) ch.*ones(y,1)];
-        nd =[nuclei(n).nd; y ch];
+        drow=[ndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1) ch.*ones(size(ndots,1),1)];
+        nd =[nuclei(n).nd; size(ndots,1) ch];
         thr = [nuclei(n).thr; x ch];
-        volms = [nuclei(n).vol; vols(dots_idx) ch.*ones(y,1)];
-        intensities = [nuclei(n).intensity; intensity(dots_idx) ch.*ones(y,1)];
+        volms = [nuclei(n).vol; vols(dots_idx) ch.*ones(size(ndots,1),1)];
+        intensities = [nuclei(n).intensity; intensity(dots_idx) ch.*ones(size(ndots,1),1)];
                
                 nuclei(n).dots = [nuclei(n).dots ; drow];
                 nuclei(n).nd = nd;
@@ -186,14 +186,7 @@ function [dots vols intensity bwl x y] =updateAxes(h,x,y,cvx,dots,vols,intensity
                 nuclei(n).vol = volms;
                 nuclei(n).intensity = intensities;
     end     
-       
-    dots=[dots dots_nuc];
-    vols=[vols dots_nuc];
-    intensity=[intensity dots_nuc];
-    
-    
-    
-    
+          
     set(l1,'ButtonDownFcn','');
     set(h.f,'WindowButtonUpFcn','');
     set(hf,'ButtonDownFcn','');
