@@ -37,7 +37,7 @@ bw = im2bw(I2, gt);
 
 Iproperties={'Area','PixelIdxList','PixelList'};
 blobM = regionprops(DL, I, Iproperties);
-thrup=14000;
+thrup=11000;
 for k = 1:bn
         if blobM(k).Area>thrup
             xi=blobM(k).PixelList(:,1);
