@@ -1,7 +1,7 @@
 function DL=segmentNuclei(I)
 
 
-H = FSPECIAL('disk',10);
+H = fspecial('disk',10);
 I2=imfilter(I,H,'replicate');
 gt=graythresh(I2);
 bw = im2bw(I2, gt);
@@ -46,7 +46,7 @@ for k = 1:bn
             ni=imcrop(I,rect);
             dli=imcrop(DL,rect);
             
-            H = FSPECIAL('disk',10);
+            H = fspecial('disk',10);
             I2=imfilter(ni,H,'replicate');
             gt=graythresh(I2);
             bw = im2bw(I2, gt);
