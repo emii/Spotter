@@ -2,14 +2,18 @@ function tform=calibrateShift(dapi_b_file,ch_b_file)
 
 scr=get(0, 'ScreenSize');
 pos=[scr(1:2)+scr(3:4).*0.01,scr(3:4).*0.95];
-    
-tmp=parse_stack(dapi_b_file,1,15);
+
+
+info=imfinfo(dapi_b_file); 
+tmp=parse_stack(dapi_b_file,1,numel(info));
 dapi = tmp/max(tmp(:));
 dapi=zproject(tmp);
 
-tmp=parse_stack(ch_b_file,1,15);
+info=imfinfo(ch_b_file); 
+tmp=parse_stack(ch_b_file,1,numel(info));
 ch = tmp/max(tmp(:));
 ch=zproject(tmp);
+
 
 dapi=imadjust(dapi, stretchlim(dapi,[0 0.999]),[]);
 ch=imadjust(ch, stretchlim(ch,[0 0.999]),[]);

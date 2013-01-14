@@ -1,5 +1,6 @@
-function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv,BW,nuclei,ch)
+function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv,BW,nuclei,ch,cell_dif)
     
+    ncell_dif=nan;
     %h1===========
     
     delete(get(h.ax{1},'Children'));
@@ -21,12 +22,15 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     %h2===========
     
     delete(get(h.ax{2},'Children'));
+    delete(get(h.ax{4},'Children'));
     set(h.ax{2},'NextPlot','add');
+    set(h.ax{4},'NextPlot','add');
 
     yl2=max(cv)+max(cv)*0.2;
     xlab=['default threshold=' num2str(x)];
     set(get(h.ax{2},'Title'),'String',xlab)
     plot(h.ax{2},thresholds,cv,'Color',[.6 .6 .6]);
+    plot(h.ax{4},thresholds,cellfun(@length,cell_dif),'Color','m');
     l2 = line([x x],[0 yl2],'Color','r','Parent',h.ax{2},'LineWidth',2);
     plot(h.ax{2},x,cvx,'r*');
     set(h.ax{2},'XLim',[0 1]);
@@ -137,6 +141,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         elseif x<0.01
             x=0.01;
         end
+        ncell_dif=cell_dif{round(x*100)};
         x= thresholds(round(x*100));
         y = thresholdfn(round(x*100)); 
         
@@ -149,10 +154,12 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     end
     
     function stopDragFcn(varargin)
+        delete(findobj(h.imStack,'color','r'));
         set(h.f,'WindowButtonMotionFcn','');
         set(h.f,'WindowButtonUpFcn','');
         [dots vols intensity bwl]=getdots(n_ims,x);
         set(p3,'XData',dots(:,1),'YData',dots(:,2));
+        utilities.plotBoundaries(znims,nuclei(ncell_dif),'r',h.imStack,0);
         %set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
         x1=round(dots(:,2));y1=round(dots(:,1));
         dots_nuc=BW(sub2ind(size(BW), x1, y1));
@@ -194,5 +201,6 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     set(h.ax{2},'NextPlot','replaceChildren');
     set(h.imStack,'NextPlot','replaceChildren');
     set(h.ax{3},'NextPlot','replaceChildren');
+     set(h.ax{4},'NextPlot','replaceChildren');
     set(h.countNext,'UserData',0)
 end

@@ -66,7 +66,7 @@ function UserData= thresholdDots(UserData,h,selection)
             BW1=BW;
             BW1(BW1>0)=1;
             cims=cims.*repmat(BW1,[1,1,size(cims,3)]);
-            thresholdfn = multithreshstack(cims,threshold_num,h);
+            [thresholdfn cell_dif] = multithreshstack(cims,threshold_num,BW,numel(nuclei),h);
             thresholds = (1:threshold_num)/threshold_num;
             [t nc cv]= auto_thresholding(thresholdfn,CV_width,CV_offset);
             x=thresholds(t);
@@ -75,7 +75,7 @@ function UserData= thresholdDots(UserData,h,selection)
             
             [dots vols intensity bwl] = getdots(cims,x);
 
-            [nuclei,bwl] = ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,cims,nuclei,thresholds,thresholdfn,cv,BW,nuclei,ch);
+            [nuclei,bwl] = ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,cims,nuclei,thresholds,thresholdfn,cv,BW,nuclei,ch,cell_dif);
                  L{ch}=max(bwl,[],3);
                  %L{ch}(nuclei(n).PixelList(:,2),nuclei(n).PixelList(:,1))=...
                   %  bwl(snuc.PixelList(:,2),snuc.PixelList(:,1));
