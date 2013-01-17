@@ -182,6 +182,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         dots_idx=dots_nuc==n;
         ndots=dots(dots_idx,:);
         drow=[ndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1) ch.*ones(size(ndots,1),1)];
+        %drow=[ndots ch.*ones(size(ndots,1),1)];
         nd =[nuclei(n).nd; size(ndots,1) ch];
         thr = [nuclei(n).thr; x ch];
         volms = [nuclei(n).vol; vols(dots_idx) ch.*ones(size(ndots,1),1)];
@@ -193,7 +194,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
                 nuclei(n).vol = volms;
                 nuclei(n).intensity = intensities;
     end     
-          
+    %reset values      
     set(l1,'ButtonDownFcn','');
     set(h.f,'WindowButtonUpFcn','');
     set(hf,'ButtonDownFcn','');
@@ -201,6 +202,6 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     set(h.ax{2},'NextPlot','replaceChildren');
     set(h.imStack,'NextPlot','replaceChildren');
     set(h.ax{3},'NextPlot','replaceChildren');
-     set(h.ax{4},'NextPlot','replaceChildren');
+    set(h.ax{4},'NextPlot','replaceChildren');
     set(h.countNext,'UserData',0)
 end

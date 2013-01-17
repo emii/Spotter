@@ -2,8 +2,12 @@ function UserData= thresholdDots(UserData,h,selection)
 % some parameters
     CV_width = 5;
     CV_offset = 0.1;
-    LOG_Size = [11 11 7];%15
-    LOG_Sigma = [1.4 1.4 1.1];%1.3
+    %LOG_Size = [11 11 7];%15
+    %LOG_Sigma = [1.4 1.4 1.1];%1.3
+    LOG_Size = [15 15 7];%15
+    LOG_Sigma = [1.3 1.3 1.1];%1.3
+    
+    
 
     stacks=UserData.files;
     nuclei=UserData.nuclei;
@@ -20,6 +24,10 @@ function UserData= thresholdDots(UserData,h,selection)
         if ~isempty(tform{ch})
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info),tform{ch});
+%             BW1 = imtransform(BW, tform, ...
+%             'XData', [1, size(stackBW, 2)], ...
+%             'YData', [1, size(stackBW, 1)]);
+%            
            %=======
 %            aa=sort(cims(:));
 %            b1=size(aa,1)*0.999;
@@ -30,6 +38,7 @@ function UserData= thresholdDots(UserData,h,selection)
         else
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info));
+           %BW1=BW;
            %========
 %            aa=sort(cims(:));
 %            b1=size(aa,1)*0.999;
