@@ -25,20 +25,22 @@ if nargin < 2
 else
     if nargin <4
         stack=zeros(imwidth,imheight,last-first+1);
-        
+        c=1;
         for i=first:last,
-            stack(:,:,i) = imread(filename,i,'info',info);%returns double
+            stack(:,:,c) = imread(filename,i,'info',info);%returns double
             %stack(:,:,i) = imread(filename,'Index',i,'Info',info);%returns uint16
+            c=c+1;
         end
     
     else
         stack=zeros(imwidth,imheight,last-first+1);
-        
+        c=1;
         for i=first:last,
             tmp = imread(filename,i,'info',info);%returns double
-            stack(:,:,i) = imtransform(tmp, tform, ...
+            stack(:,:,c) = imtransform(tmp, tform, ...
             'XData', [1, size(stack, 2)], ...
             'YData', [1, size(stack, 1)]);
+            c=c+1;
         end
     end
         

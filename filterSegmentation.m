@@ -28,7 +28,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     imagesc(zim,'Parent',ax);colormap gray;
     %title('Labeled segmented nuclei()'); axis square;
     hold on;
-    boundaries = bwboundaries(DL2);	
+    boundaries = bwboundaries(DL2,8,'noholes');	
     numberOfBoundaries = size(boundaries,1);
     labelShiftX = -7;	% Used to align the labels in the centers of the blobs.
     for k = 1 : numberOfBoundaries
