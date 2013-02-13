@@ -25,7 +25,7 @@ for i = 1:npoints
   x1=round(dots(:,2));y1=round(dots(:,1));
   dots_nuc=BW(sub2ind(size(BW), x1, y1));
   dots_nuc=dots_nuc(dots_nuc>0);
-  [idx counts]=count_unique(dots_nuc);
+  [idx counts]=utilities.count_unique(dots_nuc);
   new_count(idx)=counts;  
   dif=new_count-old_count;
   ndif{i}=cn(dif~=0);
