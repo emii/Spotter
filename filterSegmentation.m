@@ -24,10 +24,11 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
 
     % bwboundaries() returns a cell array, where each cell contains the row/column coordinates for an object in the image.
     % Plot the borders of all the coins on the original grayscale image using the coordinates returned by bwboundaries.
-    cla(ax);
+    delete(get(ax,'Children'));
     imagesc(zim,'Parent',ax);colormap gray;
+    
     %title('Labeled segmented nuclei()'); axis square;
-    hold on;
+    set(ax,'NextPlot','add')
     boundaries = bwboundaries(DL2,8,'noholes');	
     numberOfBoundaries = size(boundaries,1);
     labelShiftX = -7;	% Used to align the labels in the centers of the blobs.
@@ -58,7 +59,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
         blobCentroid = blobMeasurements(k).Centroid;		% Get centroid.
         blobECD(k) = sqrt(4 * blobArea / pi);					% Compute ECD - Equivalent Circular Diameter.
         fprintf(1,'#%2d %11.1f %8.1f %8.1f %8.1f %8.1f \n', k, blobArea, blobPerimeter, blobCentroid, blobECD(k));
-        text(blobCentroid(1) + labelShiftX, blobCentroid(2), num2str(k), 'FontSize', 14, 'FontWeight', 'Bold'); 
+        text(blobCentroid(1) + labelShiftX, blobCentroid(2), num2str(k), 'FontSize', 14, 'FontWeight', 'Bold','Parent',ax); 
     %calculate reference channel intensity
    
     
@@ -74,6 +75,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
         [blobMeasurements, DL2]= filterSegmentation(DL3,zim,ax);
     else
         drawnow
+        set(ax,'NextPlot','ReplaceChildren')
          return
     end
     

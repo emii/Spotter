@@ -2,7 +2,7 @@ function tform=calibrateShift(dapi_b_file,ch_b_file)
 
 scr=get(0, 'ScreenSize');
 pos=[scr(1:2)+scr(3:4).*0.01,scr(3:4).*0.95];
-H = -FSPECIAL('log',15,1.5);
+H = -fspecial('log',15,1.5);
 
 info=imfinfo(dapi_b_file); 
 tmp=parse_stack(dapi_b_file,1,numel(info));

@@ -38,7 +38,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
     %imStack============
     
-    cm=brighten(jet(50),-.5);
+    cm=brighten(cool(50),-.5);
     
     delete(get(h.imStack,'Children'));
     set(h.imStack,'NextPlot','add');
@@ -75,6 +75,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
 
 
     %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
+    %scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
     scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
 
 
