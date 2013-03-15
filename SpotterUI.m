@@ -29,70 +29,83 @@ h = findall(0,'tag',mfilename);
     handles.f=fig;
     
     % settings menu
-        settings_menu = uimenu(fig,'Label','Settings');
+        settings_menu = uimenu(fig,'Label','Settings','Parent',fig);
+        
+    % context menu for deleting and classifying cells
+        handles.hcmenu = uicontextmenu('Parent',fig);
+        uimenu(handles.hcmenu, 'Label', 'delete', 'Callback', @rmNuclei_Callback2);
+        uimenu(handles.hcmenu, 'Label', 'classify', 'Callback', @add_Class_Callback);
+        uimenu(handles.hcmenu, 'Label', 'subsegment', 'Callback', '');
+        uimenu(handles.hcmenu, 'Label', 'threshold', 'Callback', '');
         
     %the toolbar
         
         toolbarh = uitoolbar(fig);
         
+        
         icon=utilities.get_icon('open_set.ico');
-        uipushtool(toolbarh,'CData',icon,...
+        tb.open=uipushtool(toolbarh,'CData',icon,...
             'TooltipString','open stack set',...
             'ClickedCallback',@open_imStack_Callback,...
             'BusyAction', 'cancel');
         
         icon=utilities.get_icon('save_counts.ico');
-        uipushtool(toolbarh,'CData',icon,...
+        tb.save=uipushtool(toolbarh,'CData',icon,...
             'TooltipString','save counts',...
             'ClickedCallback',@saveCounts_Callback,...
+            'Enable','off',...
             'BusyAction', 'cancel');
  
         icon=utilities.get_icon('z_project.ico');
-        uipushtool(toolbarh,'CData',icon,...
+        tb.project=uipushtool(toolbarh,'CData',icon,...
             'TooltipString','z-project',...
             'ClickedCallback',@project_imStack_Callback,...
+            'Enable','off',...
             'BusyAction', 'cancel');
         
         icon=utilities.get_icon('auto_segment.ico');
-        uipushtool(toolbarh,'CData',icon,...
+        tb.segment=uipushtool(toolbarh,'CData',icon,...
             'TooltipString','auto segment',...
             'ClickedCallback',@autoSegment_Callback,...
+            'Enable','off',...
             'BusyAction', 'cancel');
         
         icon=utilities.get_icon('count_dots2.ico');
-        uipushtool(toolbarh,'CData',icon,...
+        tb.count=uipushtool(toolbarh,'CData',icon,...
             'TooltipString','count dots',...
+            'Enable','off',...
             'ClickedCallback',@countDots_Callback);
-        
-        icon=utilities.get_icon('open_single.ico');
-        uipushtool(toolbarh,'CData',icon,...
-            'TooltipString','open single stack',...
-            'ClickedCallback','');
-        
-        icon=utilities.get_icon('new_calib2.ico');
-        uipushtool(toolbarh,'CData',icon,...
-            'TooltipString','new calibration',...
-            'ClickedCallback','');
-        
-        icon=utilities.get_icon('manual_segment.ico');
-        uipushtool(toolbarh,'CData',icon,...
-            'TooltipString','manual segment',...
-            'ClickedCallback','');
-                
-        icon=utilities.get_icon('settings.ico');
-        uipushtool(toolbarh,'CData',icon,...
-            'TooltipString','settings',...
-            'ClickedCallback','');
-        
-         icon=utilities.get_icon('pref2.ico');
-        uipushtool(toolbarh,'CData',icon,...
-            'TooltipString','settings',...
-            'ClickedCallback','');
-        
-        icon=utilities.get_icon('stack_crop.ico');
-        uipushtool(toolbarh,'CData',icon,...
-            'TooltipString','crop stack',...
-            'ClickedCallback','');
+        handles.tb=tb;
+%         
+%         icon=utilities.get_icon('open_single.ico');
+%         uipushtool(toolbarh,'CData',icon,...
+%             'TooltipString','open single stack',...
+%             'ClickedCallback','');
+%         
+%         icon=utilities.get_icon('new_calib2.ico');
+%         uipushtool(toolbarh,'CData',icon,...
+%             'TooltipString','new calibration',...
+%             'ClickedCallback','');
+%         
+%         icon=utilities.get_icon('manual_segment.ico');
+%         uipushtool(toolbarh,'CData',icon,...
+%             'TooltipString','manual segment',...
+%             'ClickedCallback','');
+%                 
+%         icon=utilities.get_icon('settings.ico');
+%         uipushtool(toolbarh,'CData',icon,...
+%             'TooltipString','settings',...
+%             'ClickedCallback','');
+%         
+%          icon=utilities.get_icon('pref2.ico');
+%         uipushtool(toolbarh,'CData',icon,...
+%             'TooltipString','settings',...
+%             'ClickedCallback','');
+%         
+%         icon=utilities.get_icon('stack_crop.ico');
+%         uipushtool(toolbarh,'CData',icon,...
+%             'TooltipString','crop stack',...
+%             'ClickedCallback','');
         
 
         
@@ -112,11 +125,11 @@ h = findall(0,'tag',mfilename);
             'Position', [.12, 0.01, 0.5, 0.81], ...
             'Title', 'Image');
 
-        panelNucleiList = uipanel( ...
+        panelChannelList = uipanel( ...
             'Parent', fig, ...
             'Units', 'normalized', ...
             'Position', [.12, .82, .10, .17], ...
-            'Title', 'Nuclei Selection');
+            'Title', 'Channel Selection');
 
         panelMenu = uipanel( ...
             'Parent', fig, ...
@@ -153,6 +166,8 @@ h = findall(0,'tag',mfilename);
             'Position', [.01, .01, .73, .4], ...
             'HandleVisibility', 'callback', ...
             'NextPlot', 'replacechildren', ...
+            'Visible','off',...
+            'Tag','thresholding',...
             'FontSize', 8);
 
         handles.ax{2} = axes( ...
@@ -161,6 +176,8 @@ h = findall(0,'tag',mfilename);
             'Position', [.06, .45, .92, .2], ...
             'HandleVisibility', 'callback', ...
             'NextPlot', 'replacechildren',...
+            'Visible','off',...
+            'Tag','thresholding',...
             'FontSize', 8);
         handles.ax{4} = axes( ...
             'YAxisLocation','right',...
@@ -170,6 +187,8 @@ h = findall(0,'tag',mfilename);
             'Position', [.06, .45, .92, .2], ...
             'HandleVisibility', 'callback', ...
             'NextPlot', 'replacechildren',...
+            'Visible','off',...
+            'Tag','thresholding',...
             'FontSize', 8,'Xtick',[],'Color','none');
 
         handles.ax{1} = axes( ...
@@ -178,6 +197,8 @@ h = findall(0,'tag',mfilename);
             'Position', [.06, .69, .92, .27], ...
             'HandleVisibility', 'callback', ...
             'NextPlot', 'replacechildren',...
+            'Visible','off',...
+            'Tag','thresholding',...
             'FontSize', 8);
 
         handles.countNext = uicontrol( ...
@@ -188,6 +209,9 @@ h = findall(0,'tag',mfilename);
             'String', 'Next', ...
             'UserData',0,...
             'Callback', @countNext_Callback, ...
+            'Visible','off',...
+            'Enable','off',...
+            'Tag','thresholding',...
             'BusyAction', 'cancel');
 
 
@@ -231,11 +255,11 @@ h = findall(0,'tag',mfilename);
 %             'BusyAction', 'cancel');
 
         handles.ChannelList = uicontrol( ...
-            'Parent', panelMenu, ...
+            'Parent', panelChannelList, ...
             'Style', 'listbox', ...
             'String', '', ...
             'Units','normalized',...
-            'Position', [.05, .25, .9, .2], ...
+            'Position', [.05, .201, .9, .8], ...
             'Callback', '', ...
             'BusyAction', 'cancel', ...
             'HorizontalAlignment','center',...
@@ -261,24 +285,24 @@ h = findall(0,'tag',mfilename);
 %             'BusyAction', 'cancel');
 
         % panelNucleiList: listbox showing the available channels
-        handles.NucleiList = uicontrol( ...
-            'Parent', panelNucleiList, ...
-            'Style', 'listbox', ...
-            'String', '', ...
-            'Units','normalized',...
-            'Position', [.05, .201, .9, .8], ...
-            'Callback', @rmNucleiList_Callback, ...
-            'BusyAction', 'cancel', ...
-            'HorizontalAlignment','right',...
-            'Max', 2, 'Min', 0); % this allows multiple selections
-        handles.rmNuclei = uicontrol( ...
-            'Parent', panelNucleiList, ...
-            'Style', 'pushbutton', ...
-            'String', 'Remove Nuclei', ...
-            'Units','normalized',...
-            'Position', [.05, .01, .9 .2], ...
-            'Callback', @rmNuclei_Callback, ...
-            'BusyAction', 'cancel'); % this allows multiple selections
+%         handles.NucleiList = uicontrol( ...
+%             'Parent', panelNucleiList, ...
+%             'Style', 'listbox', ...
+%             'String', '', ...
+%             'Units','normalized',...
+%             'Position', [.05, .201, .9, .8], ...
+%             'Callback', @rmNucleiList_Callback, ...
+%             'BusyAction', 'cancel', ...
+%             'HorizontalAlignment','right',...
+%             'Max', 2, 'Min', 0); % this allows multiple selections
+%         handles.rmNuclei = uicontrol( ...
+%             'Parent', panelNucleiList, ...
+%             'Style', 'pushbutton', ...
+%             'String', 'Remove Nuclei', ...
+%             'Units','normalized',...
+%             'Position', [.05, .01, .9 .2], ...
+%             'Callback', @rmNuclei_Callback, ...
+%             'BusyAction', 'cancel'); % this allows multiple selections
 
         %store the hanldes in guidata
         guidata(fig, handles);
@@ -321,6 +345,7 @@ function initialize(fig)
     default.dirpath=pwd;
     default.stack_range=[1,100];
     default.ref_channel='dapi_';
+    default.proj_method='max';
     default.segmentation_method='auto';
     default.thr_number=100;
     default.thr_window=5;
@@ -350,11 +375,28 @@ function initialize(fig)
     DefaultData.I2=[];
     DefaultData.nuclei=[];
     DefaultData.BW=[];
+    DefaultData.Counted=[];
     
     h=guidata(fig);
     
     set(h.uiMessage,'string','Load an image stack or start calibration')
 
+    
+    set(h.tb.project,'Enable','off')
+    set(h.tb.segment,'Enable','off')
+    set(h.tb.save,'Enable','off')
+    set(h.tb.count,'Enable','off')
+    set(h.countNext,'Visible','off','Enable','off')
+    
+    
+    set(h.ax{1},'Visible','off')
+    set(h.ax{2},'Visible','off')
+    set(h.ax{3},'Visible','off')
+    set(h.ax{4},'Visible','off')
+    
+    
+    
+    
  
      set(h.f,'WindowButtonUpFcn','');
      set(h.ax{1},'NextPlot','replaceChildren');
@@ -372,7 +414,7 @@ function initialize(fig)
 
     
     set(h.ChannelList,'String','','Value',[]);
-    set(h.NucleiList,'String','','Value',[]);
+%    set(h.NucleiList,'String','','Value',[]);
 
     delete(get(h.panelSettings,'Children'));
         
@@ -385,11 +427,13 @@ end
 function gui_closereq(hObject,eventdata)
 % User-defined close request function 
 % to display a question dialog box 
+   h=guidata(hObject);
    selection = questdlg(['Close ', get(hObject,'Name'),'?',', all unsaved information will be lost.'],...
       'Close Request Function',...
       'Yes','No','Yes'); 
    switch selection, 
       case 'Yes',
+         %set(h.countNext,'UserData',1);
          delete(hObject)
       case 'No'
       return 
@@ -400,8 +444,9 @@ end
 %open image stack
 function open_imStack_Callback(hObject,eventdata) 
      h=guidata(hObject);
-     st=getappdata(h.f,'status');
-      if st.loaded
+     old_st=getappdata(h.f,'status');
+     
+      if old_st.loaded
         % ask user to confirm for closing the software
         selection = questdlg('Open new stack set? all unsaved information will be lost.',...
             'Open...',...
@@ -412,39 +457,57 @@ function open_imStack_Callback(hObject,eventdata)
         end
         
       end
-      
-         UserData=get(h.f,'UserData');
-         [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)',UserData.dirpath);
+         current_settings=getappdata(h.f,'settings');
+         [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)',current_settings.dirpath);
          initialize(h.f)
-         if imfilter_index   
-         file_index=imname((end-6):(end-4));        
-            [files,channels]=utilities.all_channel_names(impath,file_index);
-            set(h.ChannelList,'String',files); 
-
-
-             info=imfinfo([impath 'dapi_' file_index '.tif']);   
-             ims=parse_stack([impath 'dapi_' file_index '.tif'],1,numel(info));
+        if imfilter_index   
+             file_index=imname((end-6):(end-4));        
+             [files,channels]=utilities.all_channel_names(impath,file_index);
+             set(h.ChannelList,'String',files); 
+             info=imfinfo([impath current_settings.ref_channel file_index '.tif']);   
+             ims=parse_stack([impath current_settings.ref_channel file_index '.tif'],1,numel(info));
              front=ims(:,:,1);
              imagesc(front,'Parent',h.imStack);axes(h.imStack);colormap gray;axis square;axis off;axis image
-
-        h=setSettingsControls(h,channels);
+   
+         h=setSettingsControls(h,channels);
         %store the hanldes in guidata
          guidata(h.f,h);
         %store UserData
          UserData.index=file_index;
          UserData.dirpath=impath;
+         current_settings.dirpath=UserData.dirpath;
          UserData.I=ims;
          UserData.files=files;
          UserData.channels=channels;
          UserData.tform=cell(numel(channels),1);
          UserData.L=cell(numel(channels),1);
+            nuclei.Label='0';
+            UserData.BW=ones(size(ims,1),size(ims,2));
+            UserData.Counted=zeros(1,numel(channels));
+            tmp=bwboundaries(UserData.BW,8,'noholes');
+            nuclei.boundaries = tmp{1};	
+            nuclei.Centroid=[size(ims,1)/2,size(ims,1)/2];
+            nuclei.nd=[];
+            nuclei.thr=[];
+            nuclei.dots=[];
+            nuclei.intensity=[];
+            nuclei.Dapi=[];
+            nuclei.vol=[];
+            nuclei.class=1;
+            UserData.nuclei=nuclei;
+         UserData.BW=ones(size(ims,1),size(ims,1));
          dt=clock;
          dt=fix(dt);
          UserData.dt=datestr(dt,'dd-mm-yyyy-HH-MM');
          set(h.f,'UserData',UserData);
+         st=getappdata(h.f,'status');
          st.loaded=1;
+         st.counted=zeros(1,numel(channels));
+         set(h.tb.project,'Enable','on');
          setappdata(h.f,'status',st)
+         setappdata(h.f,'settings',current_settings)
          ui.message(h,['Loaded DAPI channel from selected stack set: ' file_index]);
+         %gui_enable(h.f,st);
          else
              return 
          end
@@ -452,16 +515,24 @@ end
 %project image stack
 function project_imStack_Callback(hObject,eventdata)
     h=guidata(hObject);
+    st=getappdata(h.f,'status');
+    settings=getappdata(h.f,'settings');
     UserData=get(h.f,'UserData');
-    zim=zproject(UserData.I);
+    zim=zproject(UserData.I,settings.proj_method);
     imagesc(zim,'Parent',h.imStack);colormap gray;
     UserData.I2=zim;
+    st.projected=1;
+    set(h.tb.segment,'Enable','on');
+    set(h.tb.count,'Enable','on');
     set(h.f,'Userdata',UserData);
-    ui.message(h,'Z-projection using max()...done');
+    setappdata(h.f,'status',st);
+    ui.message(h,['Z-projection using ' settings.proj_method ' projection method... done']);
+    %gui_enable(h.f,st);
 end
 %segment nuclei
 function autoSegment_Callback(hObject,eventdata)
     h=guidata(hObject);
+    st=getappdata(h.f,'status');
     ui.message(h,'Performing segmentation, please wait...');
     UserData=get(h.f,'UserData');
     DL=segmentNuclei(UserData.I2);
@@ -470,44 +541,107 @@ function autoSegment_Callback(hObject,eventdata)
     UserData.nuclei=nuclei;
     UserData.BW=BW;
     set(h.f,'Userdata',UserData);
-    nuclei_Labels={nuclei.Label};
-    set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
+    %nuclei_Labels={nuclei.Label};
+%    set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
+    st.segmented=1;
+    set(h.tb.project,'Enable','off');
+    im=findobj(get(h.imStack,'Children'),'Type','image');
+    set(im,'uicontextmenu',h.hcmenu);
+    setappdata(h.f,'status',st);
     ui.message(h,'Segmentation ... done, select wrong segmented nuclei -> to be removed');
 end
 %remove segmented nuclei
-function rmNuclei_Callback(hObject,eventdata)
+% function rmNuclei_Callback(hObject,eventdata)
+%     h=guidata(hObject);
+%     set(h.NucleiList,'String','');
+%     cla(h.imStack);
+%     UserData=get(h.f,'UserData');
+%     selection=get(h.NucleiList,'Value');
+%     ui.message(h,['Removing the following nuclei: ' num2str(selection) 'please wait ...']);
+%     [nuclei BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
+%     UserData.nuclei=nuclei;
+%     UserData.BW=BW;
+%     set(h.f,'Userdata',UserData);
+%     nuclei_Labels={nuclei.Label};
+%     set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
+%     ui.message(h,['Nuclei removed, ' num2str(numel(nuclei)) 'nuclei re-labeled']);
+% end
+
+%remove segmented nuclei
+function rmNuclei_Callback2(hObject,eventdata)
     h=guidata(hObject);
-    set(h.NucleiList,'String','');
-    cla(h.imStack);
     UserData=get(h.f,'UserData');
-    selection=get(h.NucleiList,'Value');
-    ui.message(h,['Removing the folowing nuclei: ' num2str(selection) 'please wait ...']);
-    [nuclei BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
+    xy = get(h.imStack,'CurrentPoint');
+        selection = UserData.BW(round(xy(1,2)),round(xy(1,1)));
+        if selection ==0;
+            ui.message(h,'click inside the nuclei!')
+            return
+        end
+    cla(h.imStack);
+    ui.message(h,['Removing the following nuclei: ' num2str(selection) 'please wait ...']);
+    [nuclei, BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
+    im=findobj(get(h.imStack,'Children'),'Type','image');
+    set(im,'uicontextmenu',h.hcmenu);
     UserData.nuclei=nuclei;
     UserData.BW=BW;
     set(h.f,'Userdata',UserData);
-    nuclei_Labels={nuclei.Label};
-    set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
     ui.message(h,['Nuclei removed, ' num2str(numel(nuclei)) 'nuclei re-labeled']);
 end
-%select segmented nuclei to remove
-function rmNucleiList_Callback(hObject,eventdata)
+
+function add_Class_Callback(hObject,eventdata)
     h=guidata(hObject);
-    selection=get(gcbo,'Value'); 
-    ui.message(h,['Selected nuclei to be removed: ' num2str(selection)]);    
+    UserData=get(h.f,'UserData');
+    xy = get(h.imStack,'CurrentPoint');
+        selection = UserData.BW(round(xy(1,2)),round(xy(1,1)));
+        if selection ==0;
+            ui.message(h,'click inside the nuclei!')
+            return
+        end
+
+    set(h.imStack,'NextPlot','add');
+    nuc=UserData.nuclei(selection);
+    plot(h.imStack,nuc(1).boundaries(:,2),nuc(1).boundaries(:,1),'m')
+    UserData.nuclei(selection).class=2;
+    set(h.f,'Userdata',UserData);
+    ui.message(h,['Added class to nuclei: ' num2str(selection)]);
+    set(h.imStack,'NextPlot','Replacechildren');
 end
+
+
+
+
+
+
+%select segmented nuclei to remove
+% function rmNucleiList_Callback(hObject,eventdata)
+%     h=guidata(hObject);
+%     selection=get(gcbo,'Value'); 
+%     ui.message(h,['Selected nuclei to be removed: ' num2str(selection)]);    
+% end
 %count dots for selected channels
 function countDots_Callback(hObject, eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
     UserData.threshold_num=100;
     selection=get(h.ChannelList,'Value');
+    set(h.countNext,'Visible','on');
+    set(h.tb.segment,'Enable','off');
+    set(h.tb.project,'Enable','off');
+    set(h.ax{1},'Visible','on');
+    set(h.ax{2},'Visible','on');
+    set(h.ax{3},'Visible','on');
+    set(h.ax{4},'Visible','on');
     UserData=thresholdDots(UserData,h,selection);
 %     [UData adots]=countDots(UserData,h,selection,);
 %     UserData.UData=UData;
 %     UserData.dots=adots;
+    try
     set(h.f,'Userdata',UserData);
-    
+    catch err
+        display(err.identifier)
+        display('Unexpected close of the program while selecting a threshold')
+       
+    end
 end
 %save User Data
 function saveCounts_Callback(hObject,eventdata)
@@ -525,6 +659,14 @@ function saveCounts_Callback(hObject,eventdata)
         UserData.I=UserData.I2;
         svFullPath=fullfile(svPath, svName);
         save(svFullPath,'-mat','UserData')
+        
+        delete(allchild(h.ax{1})); 
+        delete(allchild(h.ax{2})); 
+        delete(allchild(h.ax{3})); 
+        delete(allchild(h.ax{4})); 
+        
+        
+        
     else
         return
     end

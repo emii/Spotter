@@ -2,9 +2,11 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
     ncell_dif=nan;
     %h1===========
-    
+    set(h.countNext,'Enable','on');
+    st=getappdata(h.f,'status');
     delete(get(h.ax{1},'Children'));
     set(h.ax{1},'NextPlot','add');
+    set(h.tb.save,'Enable','off');
     
     %yl1=max(thresholdfn)+max(thresholdfn)*0.1;
     yl1=2000;
@@ -38,14 +40,15 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
     %imStack============
     
-    cm=brighten(cool(50),-.5);
+    cm=brighten(hsv(50),-.5);
     
     delete(get(h.imStack,'Children'));
     set(h.imStack,'NextPlot','add');
     
     znims=zproject(n_ims);
     hf=imagesc(znims,'Parent',h.imStack);
-    utilities.plotBoundaries(znims,snuc,'g',h.imStack,0);drawnow; 
+    utilities.plotBoundaries(znims,snuc([snuc.class]==1),'g',h.imStack,0);
+    utilities.plotBoundaries(znims,snuc([snuc.class]==2),'m',h.imStack,0);drawnow; 
     
     
     p3=scatter(h.imStack,dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
@@ -55,16 +58,28 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
 
     delete(get(h.ax{3},'Children'));
     set(h.ax{3},'NextPlot','add');
-
-    [nn_ims snuc]=crop_cell(znims,BW,nuclei(1));
+    
+    if st.segmented
+    [nn_ims, snuc]=crop_cell(znims,BW,nuclei(1));
+    xi=nuclei(1).PixelList(:,1);
+    yi=nuclei(1).PixelList(:,2);
+    RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+    else
+        nn_ims=znims;
+        snuc=nuclei(1);
+        RECT=[1 1 size(znims,1)  size(znims,2)];
+        
+    end
     zcnims=zproject(nn_ims);
     imshow(zcnims,[0 1],'Parent',h.ax{3});
     utilities.plotBoundaries(zcnims,snuc,'r',h.ax{3},0);drawnow; 
     axis(h.ax{3},'image')
     
-    xi=nuclei(1).PixelList(:,1);
-    yi=nuclei(1).PixelList(:,2);
-    RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+%     xi=nuclei(1).PixelList(:,1);
+%     yi=nuclei(1).PixelList(:,2);
+%     RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+    
+    
     
     x1=round(dots(:,2));y1=round(dots(:,1));
     dots_nuc=BW(sub2ind(size(BW), x1, y1));
@@ -76,6 +91,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
 
     %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
     %scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
+    axes(h.ax{3})
     scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
 
 
@@ -84,9 +100,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
     set(hf,'ButtonDownFcn',@plotSingleNuclei)
     set(l1,'ButtonDownFcn',@startDragFcn);
-    %set(h.f,'WindowButtonUpFcn',@stopDragFcn)
-    
- 
+    %set(h.f,'WindowButtonUpFcn',@stopDragFcn) 
     
     
     
@@ -97,10 +111,18 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         if nuc ==0;
             return
         end
-        [nn_ims snuc]=crop_cell(znims,BW,nuclei(nuc));
-        xi=nuclei(nuc).PixelList(:,1);
-        yi=nuclei(nuc).PixelList(:,2);
-        RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+        
+        if st.segmented
+        [nn_ims, snuc]=crop_cell(znims,BW,nuclei(nuc));
+            xi=nuclei(nuc).PixelList(:,1);
+            yi=nuclei(nuc).PixelList(:,2);
+            RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+        else
+            nn_ims=znims;
+            snuc=nuclei(nuc);
+            RECT=[1 1 size(znims,1)  size(znims,2)];
+        end
+
 
         %h3=================
 
@@ -119,7 +141,10 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         
 
         %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
+        axes(h.ax{3})
         scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
+
+        
     end
     
     
@@ -158,7 +183,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         delete(findobj(h.imStack,'color','r'));
         set(h.f,'WindowButtonMotionFcn','');
         set(h.f,'WindowButtonUpFcn','');
-        [dots vols intensity bwl]=getdots(n_ims,x);
+        [dots, vols, intensity, bwl]=getdots(n_ims,x);
         set(p3,'XData',dots(:,1),'YData',dots(:,2));
         utilities.plotBoundaries(znims,nuclei(ncell_dif),'r',h.imStack,0);
         %set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
@@ -169,16 +194,16 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
 
     
-        
-
-
-    waitfor(h.countNext,'UserData',1)
+            waitfor(h.countNext,'UserData',1)
+    
     for n = 1:numel(nuclei)
-        
-        xi=nuclei(n).PixelList(:,1);
-        yi=nuclei(n).PixelList(:,2);
-        RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
-        
+        if st.segmented
+            xi=nuclei(n).PixelList(:,1);
+            yi=nuclei(n).PixelList(:,2);
+            RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
+        else
+            RECT=[1 1 size(znims,1)  size(znims,2)];
+        end
         
         dots_idx=dots_nuc==n;
         ndots=dots(dots_idx,:);
@@ -195,7 +220,9 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
                 nuclei(n).vol = volms;
                 nuclei(n).intensity = intensities;
     end     
-    %reset values      
+    %reset values   
+    try
+    set(h.tb.save,'Enable','on');
     set(l1,'ButtonDownFcn','');
     set(h.f,'WindowButtonUpFcn','');
     set(hf,'ButtonDownFcn','');
@@ -205,4 +232,13 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     set(h.ax{3},'NextPlot','replaceChildren');
     set(h.ax{4},'NextPlot','replaceChildren');
     set(h.countNext,'UserData',0)
+    set(h.countNext,'Enable','off');
+    catch err
+        display(err.identifier)
+    end
+        
+
+
+    
+
 end

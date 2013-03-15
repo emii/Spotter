@@ -21,6 +21,8 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     blobMeasurements(numberOfBlobs).intensity=[];
     blobMeasurements(numberOfBlobs).Dapi=[];
     
+    
+    
 
     % bwboundaries() returns a cell array, where each cell contains the row/column coordinates for an object in the image.
     % Plot the borders of all the coins on the original grayscale image using the coordinates returned by bwboundaries.
@@ -55,6 +57,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
 %         yi=pl(k).PixelList(:,2);
 %         blobMeasurements(k).Rect=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
         blobMeasurements(k).Label=num2str(k);
+        blobMeasurements(k).class=1;
         blobPerimeter = pl(k).Perimeter;		% Get perimeter.
         blobCentroid = blobMeasurements(k).Centroid;		% Get centroid.
         blobECD(k) = sqrt(4 * blobArea / pi);					% Compute ECD - Equivalent Circular Diameter.

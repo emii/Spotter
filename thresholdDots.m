@@ -11,11 +11,25 @@ function UserData= thresholdDots(UserData,h,selection)
 
     stacks=UserData.files;
     nuclei=UserData.nuclei;
+    st=getappdata(h.f,'status');
+    
+    
     tform=UserData.tform;
     threshold_num=UserData.threshold_num;
     BW=UserData.BW;
     L=UserData.L;
     for ch = selection,
+        
+        if st.counted(ch)
+            for i= 1:numel(nuclei)
+                nuclei(i).nd=nuclei(i).nd(nuclei(i).nd(:,2)~=selection,:);
+                nuclei(i).thr=nuclei(i).thr(nuclei(i).thr(:,2)~=selection,:);
+                nuclei(i).dots=nuclei(i).dots(nuclei(i).dots(:,4)~=selection,:);
+                nuclei(i).intensity=nuclei(i).intensity(nuclei(i).intensity(:,2)~=selection,:);
+                nuclei(i).vol=nuclei(i).vol(nuclei(i).vol(:,2)~=selection,:);
+            end
+        end
+        
         msg=['filtering stack: ' stacks{ch} ' please wait...'];
         ui.message(h,msg)
         wb = waitbar(0,'Parsing and filtering and stuff...');
@@ -24,34 +38,14 @@ function UserData= thresholdDots(UserData,h,selection)
         if ~isempty(tform{ch})
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info),tform{ch});
-%             BW1 = imtransform(BW, tform, ...
-%             'XData', [1, size(stackBW, 2)], ...
-%             'YData', [1, size(stackBW, 1)]);
-%            
-           %=======
-%            aa=sort(cims(:));
-%            b1=size(aa,1)*0.999;
-%            c1=aa(round(b1));
-%            cims(cims>c1)=c1;
-           %=======
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         else
            info=imfinfo(stackfile);
            cims=parse_stack(stackfile,1,numel(info));
-           %BW1=BW;
-           %========
-%            aa=sort(cims(:));
-%            b1=size(aa,1)*0.999;
-%            c1=aa(round(b1));
-%            cims(cims>c1)=c1;
-           %========
            waitbar(0.3,wb,['Loading and correcting shift for ' stacks{ch}])
         end
         
-        %zcims=zproject(cims);
-        %imax=utilities.im(zcims);
-        %ax=utilities.plotBoundaries(zcims,nuclei,'g');drawnow;
-        %waitfor(ax)
+
         waitbar(0.5,wb,['Filtering for ' stacks{ch}])
         cims = LOG_filter(cims,LOG_Size,LOG_Sigma);
         waitbar(0.9,wb,['Almost Done ' stacks{ch}])
@@ -60,29 +54,33 @@ function UserData= thresholdDots(UserData,h,selection)
         zcims=zproject(cims);
         %hn=plotBoundaries(zcims,nuclei,'g');
         %hn=plotBoundaries(zcims,nuclei(5:end),'r',hn);
-        imshow(zcims,'Parent',h.imStack);
-        utilities.plotBoundaries(zcims,nuclei,'g',h.imStack);
-        
+        delete(allchild(h.imStack));
+        imshow(zcims,'Parent',h.imStack);drawnow;
+        set(h.imStack,'NextPlot','add')
+        utilities.plotBoundaries(zcims,nuclei([nuclei.class]==1),'g',h.imStack);
+        utilities.plotBoundaries(zcims,nuclei([nuclei.class]==2),'m',h.imStack);
+        set(h.imStack,'NextPlot','replacechildren')
         %L{ch}=zeros(size(cims,2),size(cims,1));
         
         
-            ui.message(h,['Drag red line to select threshold for nuclei: '])
-            utilities.plotBoundaries(zcims,nuclei,'g',h.imStack,0);
-            %utilities.plotBoundaries(zcims,nuclei(n),'r',h.imStack,0);
+%             utilities.plotBoundaries(zcims,nuclei([nuclei.class]==1),'g',h.imStack,0);
+%             utilities.plotBoundaries(zcims,nuclei([nuclei.class]==2),'m',h.imStack,0);
             %[n_ims snuc]=crop_cell(cims,BW,nuclei(n));
 
             %n_ims = n_ims/max(n_ims(:));%normalize to single cell
             BW1=BW;
             BW1(BW1>0)=1;
             cims=cims.*repmat(BW1,[1,1,size(cims,3)]);
-            [thresholdfn cell_dif] = multithreshstack(cims,threshold_num,BW,numel(nuclei),h);
+            [thresholdfn, cell_dif] = multithreshstack(cims,threshold_num,BW,numel(nuclei),h);
             thresholds = (1:threshold_num)/threshold_num;
-            [t nc cv]= auto_thresholding(thresholdfn,CV_width,CV_offset);
+            [t, nc, cv]= auto_thresholding(thresholdfn,CV_width,CV_offset);
+            ui.message(h,'Drag red line to select threshold for nuclei: ')
+
             x=thresholds(t);
             y=nc;
             cvx=cv(t);
             
-            [dots vols intensity bwl] = getdots(cims,x);
+            [dots, vols, intensity, bwl] = getdots(cims,x);
 
             [nuclei,bwl] = ui.updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,cims,nuclei,thresholds,thresholdfn,cv,BW,nuclei,ch,cell_dif);
                  L{ch}=max(bwl,[],3);
@@ -101,9 +99,16 @@ function UserData= thresholdDots(UserData,h,selection)
 %                 nuclei(n).intensity = intensities;
                 
         %end
+        try
         ui.message(h,'Spots in the channel counted, you can save')
+        catch err
+            display(err.identifier)
+        end
         
+        st.counted(ch)=1;
+        UserData.Counted(ch)=1;
     end
+    setappdata(h.f,'status',st)
     UserData.nuclei=nuclei;
     UserData.L=L;
 end
