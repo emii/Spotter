@@ -1,25 +1,25 @@
 function UserData= thresholdDots(UserData,h,selection)
 % some parameters
-    CV_width = 5;
-    CV_offset = 0.1;
-    %LOG_Size = [11 11 7];%15
-    %LOG_Sigma = [1.4 1.4 1.1];%1.3
-    LOG_Size = [15 15 7];%15
-    LOG_Sigma = [1.3 1.3 1.1];%1.3
-    
-    
 
+    
+    st=getappdata(h.f,'status');
+    settings=getappdata(h.f,'settings');
     stacks=UserData.files;
     nuclei=UserData.nuclei;
-    st=getappdata(h.f,'status');
     
+    CV_width = settings.thr_window;
+    CV_offset = settings.thr_penalty;
+    LOG_Size = settings.filter_size;
+    LOG_Sigma = settings.filter_sigma;
+    threshold_num=settings.thr_number;    
     
     tform=UserData.tform;
-    threshold_num=UserData.threshold_num;
+    
     BW=UserData.BW;
     L=UserData.L;
     for ch = selection,
-        
+        set(h.tb.count,'Enable','off');
+        set(h.tb.save,'Enable','off');
         if st.counted(ch)
             for i= 1:numel(nuclei)
                 nuclei(i).nd=nuclei(i).nd(nuclei(i).nd(:,2)~=selection,:);
@@ -101,12 +101,14 @@ function UserData= thresholdDots(UserData,h,selection)
         %end
         try
         ui.message(h,'Spots in the channel counted, you can save')
+        set(h.ChannelList,'Value',[]);
+        set(h.tb.count,'Enable','on');
         catch err
             display(err.identifier)
         end
         
         st.counted(ch)=1;
-        UserData.Counted(ch)=1;
+        UserData.Counted(ch)=true;
     end
     setappdata(h.f,'status',st)
     UserData.nuclei=nuclei;

@@ -29,14 +29,14 @@ h = findall(0,'tag',mfilename);
     handles.f=fig;
     
     % settings menu
-        settings_menu = uimenu(fig,'Label','Settings','Parent',fig);
+        %settings_menu = uimenu(fig,'Label','Settings','Parent',fig);
         
     % context menu for deleting and classifying cells
         handles.hcmenu = uicontextmenu('Parent',fig);
         uimenu(handles.hcmenu, 'Label', 'delete', 'Callback', @rmNuclei_Callback2);
-        uimenu(handles.hcmenu, 'Label', 'classify', 'Callback', @add_Class_Callback);
-        uimenu(handles.hcmenu, 'Label', 'subsegment', 'Callback', '');
-        uimenu(handles.hcmenu, 'Label', 'threshold', 'Callback', '');
+        uimenu(handles.hcmenu, 'Label', 'mark', 'Callback', @add_Class_Callback);
+        %uimenu(handles.hcmenu, 'Label', 'subsegment', 'Callback', '');
+        %uimenu(handles.hcmenu, 'Label', 'threshold', 'Callback', '');
         
     %the toolbar
         
@@ -131,16 +131,10 @@ h = findall(0,'tag',mfilename);
             'Position', [.12, .82, .10, .17], ...
             'Title', 'Channel Selection');
 
-        panelMenu = uipanel( ...
-            'Parent', fig, ...
-            'Units', 'normalized', ...
-            'Position', [.01, .49, .1, .50], ...
-            'Title', 'Menu');
-
         handles.panelSettings = uipanel( ...
             'Parent', fig, ...
             'Units', 'normalized', ...
-            'Position', [.01, .01, .1, .47], ...
+            'Position', [.01, .01, .1, .98], ...
             'Title', 'Settings');
 
         panelThresholds = uipanel( ...
@@ -157,6 +151,18 @@ h = findall(0,'tag',mfilename);
             'Position', [.01, .01, .9, .9], ...
             'FontSize',16,...
             'String', 'Load an image stack or start calibration');
+        
+       handles.ChannelList = uicontrol( ...
+            'Parent', panelChannelList, ...
+            'Style', 'listbox', ...
+            'String', '', ...
+            'Units','normalized',...
+            'Position', [.05, .201, .9, .8], ...
+            'Callback', '', ...
+            'BusyAction', 'cancel', ...
+            'HorizontalAlignment','center',...
+            'FontName','courier',...
+            'Max', 2, 'Min', 0); % this allows multiple selections
 
           % panelThresholds: axes for Threshold selection
         handles.ax = cell(4, 1);
@@ -208,12 +214,11 @@ h = findall(0,'tag',mfilename);
             'Position', [.75, .3, .2, .1], ...
             'String', 'Next', ...
             'UserData',0,...
-            'Callback', @countNext_Callback, ...
+            'Callback', 'set(gcbo,''UserData'',1)', ...
             'Visible','off',...
             'Enable','off',...
             'Tag','thresholding',...
             'BusyAction', 'cancel');
-
 
         % panelImageStack: axes for Image Stack
         handles.imStack = axes( ...
@@ -224,97 +229,12 @@ h = findall(0,'tag',mfilename);
             'HandleVisibility', 'callback', ...
             'NextPlot', 'replacechildren');
         axis(handles.imStack,'off','image','ij');
-
-
-        % panelMenu: buttons for all accessible actions
-%         uicontrol( ...
-%             'Parent', panelMenu, ...
-%             'Style', 'pushbutton', ...
-%             'Units', 'normalized', ...
-%             'Position', [.05, .85, .9, .1], ...
-%             'String', 'Open Stack Set', ...
-%             'Callback', @open_imStack_Callback, ...
-%             'BusyAction', 'cancel');
-% 
-%         handles.zProject = uicontrol( ...
-%             'Parent', panelMenu, ...
-%             'Style', 'pushbutton', ...
-%             'Units', 'normalized', ...
-%             'Position', [.05, .75, .9, .1], ...
-%             'String', 'Z-projection (max)', ...
-%             'Callback', @project_imStack_Callback, ...
-%             'BusyAction', 'cancel');
-% 
-%         handles.autoSegment = uicontrol( ...
-%             'Parent', panelMenu, ...
-%             'Style', 'pushbutton', ...
-%             'Units', 'normalized', ...
-%             'Position', [.05, .65, .9, .1], ...
-%             'String', 'Auto Segment', ...
-%             'Callback', @autoSegment_Callback, ...
-%             'BusyAction', 'cancel');
-
-        handles.ChannelList = uicontrol( ...
-            'Parent', panelChannelList, ...
-            'Style', 'listbox', ...
-            'String', '', ...
-            'Units','normalized',...
-            'Position', [.05, .201, .9, .8], ...
-            'Callback', '', ...
-            'BusyAction', 'cancel', ...
-            'HorizontalAlignment','center',...
-            'FontName','courier',...
-            'Max', 2, 'Min', 0); % this allows multiple selections
-
-%         handles.uiCount = uicontrol( ...
-%             'Parent', panelMenu, ...
-%             'Style', 'pushbutton', ...
-%             'Units', 'normalized', ...
-%             'Position', [.05, .15, .9, .1], ...
-%             'String', 'Count Dots', ...
-%             'Callback', @countDots_Callback, ...
-%             'BusyAction', 'cancel');
-% 
-%         handles.uiSave = uicontrol( ...
-%             'Parent', panelMenu, ...
-%             'Style', 'pushbutton', ...
-%             'Units', 'normalized', ...
-%             'Position', [.05, .05, .9, .1], ...
-%             'String', 'Save Counts', ...
-%             'Callback', @saveCounts_Callback, ...
-%             'BusyAction', 'cancel');
-
-        % panelNucleiList: listbox showing the available channels
-%         handles.NucleiList = uicontrol( ...
-%             'Parent', panelNucleiList, ...
-%             'Style', 'listbox', ...
-%             'String', '', ...
-%             'Units','normalized',...
-%             'Position', [.05, .201, .9, .8], ...
-%             'Callback', @rmNucleiList_Callback, ...
-%             'BusyAction', 'cancel', ...
-%             'HorizontalAlignment','right',...
-%             'Max', 2, 'Min', 0); % this allows multiple selections
-%         handles.rmNuclei = uicontrol( ...
-%             'Parent', panelNucleiList, ...
-%             'Style', 'pushbutton', ...
-%             'String', 'Remove Nuclei', ...
-%             'Units','normalized',...
-%             'Position', [.05, .01, .9 .2], ...
-%             'Callback', @rmNuclei_Callback, ...
-%             'BusyAction', 'cancel'); % this allows multiple selections
-
-        %store the hanldes in guidata
-        guidata(fig, handles);
-        %initialize all
-        %initialize();
         % setting visibility to "on" only now speeds up the window creation
         set(fig, 'Visible', 'on');
-        % use guidata only for handles related to the actual user interface
-        % use appdata to store internal data
-        % use userdata to store the results data
         %TODO initialize values
-        initialize(fig);
+        handles=initialize(fig,handles);
+        %store the hanldes in guidata
+        guidata(fig, handles);
   
     else
         %Figure exists so bring Figure to the focus
@@ -336,25 +256,49 @@ function gui_OpeningFcn(hObject, eventdata)
 end
 
 
-function initialize(fig)
+function h=initialize(fig,h)
+    
+        % use guidata only for handles related to the actual user interface
+        % use appdata to store internal data and settings
+        % use userdata to store the measurements
+
     
     dt=clock;
     dt=fix(dt);
     
+    
+    if isempty(getappdata(fig,'settings'))
+    %===============================================
+    %=============Settings/Parameters===============
+    default.name='Counts';
     default.date=datestr(dt,'dd-mm-yyyy-HH-MM');
     default.dirpath=pwd;
     default.stack_range=[1,100];
     default.ref_channel='dapi_';
     default.proj_method='max';
     default.segmentation_method='auto';
+    default.NucleiAreaThreshold=11000;
+    default.NucleiAreaFilter=[500 25000];
+    default.filter_size=[11 11 11];
+    default.filter_sigma=[1.4 1.4 1.4];
     default.thr_number=100;
     default.thr_window=5;
-    default.thr_penalty=0.1;
-    default.nuclei_size_range=[100 10000];
-    default.segmentation_rangel=[100 10000];
-    default.filter_size=[15 15 15];
-    default.filter_sigma=[1.5 1.5 1.5];
+    default.thr_penalty=0.1; 
+    default.voxelSizeuM=[0.125 0.125 0.250];
+    %===============================================
+    setappdata(fig,'settings',default);
+    current_settings=default;
+    h=setSettingsControls(h);   
+    else
+    h=setSettingsControls(h);   
+    current_settings=getappdata(fig,'settings');
+    end
     
+    
+    
+    
+    %===============================================
+    %=============Status============================
     status.loaded=0;
     status.projected=0;
     status.enhanced=0;
@@ -363,7 +307,12 @@ function initialize(fig)
     status.counted=0;
     status.changed=0;
     status.saved=0;
+    %===============================================
     
+    
+    
+    %===============================================
+    %=============UserData==========================
     DefaultData.index='000';
     DefaultData.dirpath=pwd;
     DefaultData.I=[];
@@ -371,56 +320,52 @@ function initialize(fig)
     DefaultData.channels=[];
     DefaultData.tform=[];
     DefaultData.L=[];
-    DefaultData.dt=default.date;
+    DefaultData.dt=current_settings.date;
     DefaultData.I2=[];
     DefaultData.nuclei=[];
     DefaultData.BW=[];
     DefaultData.Counted=[];
+    %===============================================
     
-    h=guidata(fig);
     
     set(h.uiMessage,'string','Load an image stack or start calibration')
-
-    
+   
+    %Controls
     set(h.tb.project,'Enable','off')
     set(h.tb.segment,'Enable','off')
     set(h.tb.save,'Enable','off')
     set(h.tb.count,'Enable','off')
     set(h.countNext,'Visible','off','Enable','off')
     
+    %Axes/Figure/List/Buttons
+    set(h.f,'WindowButtonUpFcn','')
     
     set(h.ax{1},'Visible','off')
     set(h.ax{2},'Visible','off')
     set(h.ax{3},'Visible','off')
     set(h.ax{4},'Visible','off')
     
+    set(h.ax{1},'NextPlot','replaceChildren');
+    set(h.ax{2},'NextPlot','replaceChildren');
+    set(h.imStack,'NextPlot','replaceChildren');
+    set(h.ax{3},'NextPlot','replaceChildren');
+    set(h.ax{4},'NextPlot','replaceChildren');
     
+    delete(allchild(h.imStack)); 
+    delete(allchild(h.ax{1})); 
+    delete(allchild(h.ax{2})); 
+    delete(allchild(h.ax{3})); 
+    delete(allchild(h.ax{4}));
     
-    
- 
-     set(h.f,'WindowButtonUpFcn','');
-     set(h.ax{1},'NextPlot','replaceChildren');
-     set(h.ax{2},'NextPlot','replaceChildren');
-     set(h.imStack,'NextPlot','replaceChildren');
-     set(h.ax{3},'NextPlot','replaceChildren');
-     set(h.ax{4},'NextPlot','replaceChildren');
-     set(h.countNext,'UserData',0)
-    
-     delete(allchild(h.imStack)); 
-     delete(allchild(h.ax{1})); 
-     delete(allchild(h.ax{2})); 
-     delete(allchild(h.ax{3})); 
-     delete(allchild(h.ax{4})); 
-
-    
+    set(h.countNext,'UserData',0)
     set(h.ChannelList,'String','','Value',[]);
-%    set(h.NucleiList,'String','','Value',[]);
 
-    delete(get(h.panelSettings,'Children'));
+
+  
         
     set(fig,'UserData',DefaultData);
-    setappdata(fig,'settings',default);
-    setappdata(fig,'status',status); 
+    setappdata(fig,'status',status);
+    setappdata(fig,'settings', current_settings)
 
 end
 
@@ -440,10 +385,97 @@ function gui_closereq(hObject,eventdata)
    end
 end
 
+    
+    %---------Utilities---------------------------------------
+%generate controls for the available channels
+    function h = setSettingsControls(h)  
+    delete(get(h.panelSettings,'Children'));
+    settings=getappdata(h.f,'settings');
+    settings_names=fieldnames(settings);
+    h.settings = cell(numel(settings_names),1);
+     for i = 1:numel(settings_names)
+        %panelSettings: buttons for settings and calibration
+        ypos=.93-.045*(i-1);
+        
+       uicontrol( ...
+            'Parent', h.panelSettings, ...
+            'Style','text', ...
+            'Units', 'normalized', ...
+            'Position', [.02, ypos, .96, .025], ...
+            'String',settings_names{i} , ...
+            'HorizontalAlignment', 'left');
+        
+        if ischar(settings.(settings_names{i}))
+            val=settings.(settings_names{i});
+            h.settings{i}=uicontrol('Parent', h.panelSettings,...
+           'Units','normalized',...
+           'Style', 'edit',...
+           'String', val,...
+           'Position', [.02 ypos-.02 .96 .03],...
+           'Callback', '',...
+           'Enable','off',...
+           'tag',settings_names{i});
+        else 
+            if numel(settings.(settings_names{i}))==1;
+            val=num2str(settings.(settings_names{i}));
+            h.settings{i}=uicontrol('Parent', h.panelSettings,...
+           'Units','normalized',...
+           'Style', 'edit',...
+           'String', val,...
+           'Position', [.02 ypos-.02 .96 .03],...
+           'Callback', '',...
+           'Enable','off',...
+           'tag',settings_names{i});
+            else
+                box_handles=nan(numel(settings.(settings_names{i})),1);
+                w=.97/numel(settings.(settings_names{i}));
+                x=0.01;
+                for j=1:numel(settings.(settings_names{i}))
+                    val=settings.(settings_names{i});
+                    box_handles(j)=uicontrol('Parent', h.panelSettings,...
+                   'Units','normalized',...
+                   'Style', 'edit',...
+                   'String', num2str(val(j)),...
+                   'Position', [x ypos-.02 w .03],...
+                   'Callback', '',...
+                   'Enable','off',...
+                   'tag',settings_names{i});
+                    x=w*j;
+                    
+                end
+                h.settings{i}=box_handles;
+            end
+        end
+        
+       
+       if i==1
+           
+        h.editSettings=uicontrol( ...
+            'Parent', h.panelSettings, ...
+            'Style', 'pushbutton', ...
+            'Units', 'normalized', ...
+            'Position', [.02, .96, .49, .03], ...
+            'String', 'Edit', ...
+            'Callback', '', ...
+            'BusyAction', 'cancel');
+        
+        h.saveSettings=uicontrol( ...
+            'Parent', h.panelSettings, ...
+            'Style', 'pushbutton', ...
+            'Units', 'normalized', ...
+            'Position', [.51, .96, .49, .03], ...
+            'String', 'Save', ...
+            'Callback', '', ...
+            'BusyAction', 'cancel');
+       end
+     end
+    end
+
 %---------GUI callback functions-----------------------------------'
 %open image stack
 function open_imStack_Callback(hObject,eventdata) 
      h=guidata(hObject);
+     
      old_st=getappdata(h.f,'status');
      
       if old_st.loaded
@@ -457,34 +489,41 @@ function open_imStack_Callback(hObject,eventdata)
         end
         
       end
-         current_settings=getappdata(h.f,'settings');
-         [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)',current_settings.dirpath);
-         initialize(h.f)
+         old_settings=getappdata(h.f,'settings');
+         new_settings=old_settings;
+         [imname, impath, imfilter_index] = uigetfile('*.tif','Open an image file (.tif)',old_settings.dirpath);
+         new_settings.dirpath=impath;
+         setappdata(h.f,'settings',new_settings)
+         h=initialize(h.f,h);
         if imfilter_index   
              file_index=imname((end-6):(end-4));        
              [files,channels]=utilities.all_channel_names(impath,file_index);
              set(h.ChannelList,'String',files); 
-             info=imfinfo([impath current_settings.ref_channel file_index '.tif']);   
-             ims=parse_stack([impath current_settings.ref_channel file_index '.tif'],1,numel(info));
+             info=imfinfo([impath old_settings.ref_channel file_index '.tif']);   
+             ims=parse_stack([impath old_settings.ref_channel file_index '.tif'],1,numel(info));
              front=ims(:,:,1);
              imagesc(front,'Parent',h.imStack);axes(h.imStack);colormap gray;axis square;axis off;axis image
    
-         h=setSettingsControls(h,channels);
+%         h=setSettingsControls(h,channels);
         %store the hanldes in guidata
          guidata(h.f,h);
         %store UserData
+        
+         dt=clock;
+         dt=fix(dt);
+         UserData.dt=datestr(dt,'dd-mm-yyyy-HH-MM');
          UserData.index=file_index;
          UserData.dirpath=impath;
-         current_settings.dirpath=UserData.dirpath;
          UserData.I=ims;
          UserData.files=files;
          UserData.channels=channels;
          UserData.tform=cell(numel(channels),1);
          UserData.L=cell(numel(channels),1);
-            nuclei.Label='0';
-            UserData.BW=ones(size(ims,1),size(ims,2));
-            UserData.Counted=zeros(1,numel(channels));
+         UserData.BW=ones(size(ims,1),size(ims,2));
+         UserData.Counted=false(1,numel(channels));
+         
             tmp=bwboundaries(UserData.BW,8,'noholes');
+            nuclei.Label='0';
             nuclei.boundaries = tmp{1};	
             nuclei.Centroid=[size(ims,1)/2,size(ims,1)/2];
             nuclei.nd=[];
@@ -495,17 +534,21 @@ function open_imStack_Callback(hObject,eventdata)
             nuclei.vol=[];
             nuclei.class=1;
             UserData.nuclei=nuclei;
-         UserData.BW=ones(size(ims,1),size(ims,1));
-         dt=clock;
-         dt=fix(dt);
-         UserData.dt=datestr(dt,'dd-mm-yyyy-HH-MM');
-         set(h.f,'UserData',UserData);
+         
+         
+         
+         
          st=getappdata(h.f,'status');
          st.loaded=1;
          st.counted=zeros(1,numel(channels));
-         set(h.tb.project,'Enable','on');
+         
+         set(h.f,'UserData',UserData);
          setappdata(h.f,'status',st)
-         setappdata(h.f,'settings',current_settings)
+         
+         setappdata(h.f,'settings',new_settings)
+         
+         set(h.tb.project,'Enable','on');
+         
          ui.message(h,['Loaded DAPI channel from selected stack set: ' file_index]);
          %gui_enable(h.f,st);
          else
@@ -514,9 +557,11 @@ function open_imStack_Callback(hObject,eventdata)
 end
 %project image stack
 function project_imStack_Callback(hObject,eventdata)
+
     h=guidata(hObject);
     st=getappdata(h.f,'status');
     settings=getappdata(h.f,'settings');
+    
     UserData=get(h.f,'UserData');
     zim=zproject(UserData.I,settings.proj_method);
     imagesc(zim,'Parent',h.imStack);colormap gray;
@@ -527,22 +572,22 @@ function project_imStack_Callback(hObject,eventdata)
     set(h.f,'Userdata',UserData);
     setappdata(h.f,'status',st);
     ui.message(h,['Z-projection using ' settings.proj_method ' projection method... done']);
-    %gui_enable(h.f,st);
 end
 %segment nuclei
 function autoSegment_Callback(hObject,eventdata)
+
     h=guidata(hObject);
     st=getappdata(h.f,'status');
+    settings=getappdata(h.f,'settings');
+    
     ui.message(h,'Performing segmentation, please wait...');
     UserData=get(h.f,'UserData');
-    DL=segmentNuclei(UserData.I2);
+    DL=segmentNuclei(UserData.I2,settings.NucleiAreaFilter);
     %filtler for area and background
-    [nuclei BW]=filterSegmentation(DL,UserData.I2,h.imStack);
+    [nuclei, BW]=filterSegmentation(DL,UserData.I2,h.imStack,settings.NucleiAreaFilter);
     UserData.nuclei=nuclei;
     UserData.BW=BW;
     set(h.f,'Userdata',UserData);
-    %nuclei_Labels={nuclei.Label};
-%    set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
     st.segmented=1;
     set(h.tb.project,'Enable','off');
     im=findobj(get(h.imStack,'Children'),'Type','image');
@@ -550,27 +595,13 @@ function autoSegment_Callback(hObject,eventdata)
     setappdata(h.f,'status',st);
     ui.message(h,'Segmentation ... done, select wrong segmented nuclei -> to be removed');
 end
-%remove segmented nuclei
-% function rmNuclei_Callback(hObject,eventdata)
-%     h=guidata(hObject);
-%     set(h.NucleiList,'String','');
-%     cla(h.imStack);
-%     UserData=get(h.f,'UserData');
-%     selection=get(h.NucleiList,'Value');
-%     ui.message(h,['Removing the following nuclei: ' num2str(selection) 'please wait ...']);
-%     [nuclei BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
-%     UserData.nuclei=nuclei;
-%     UserData.BW=BW;
-%     set(h.f,'Userdata',UserData);
-%     nuclei_Labels={nuclei.Label};
-%     set(h.NucleiList,'String',nuclei_Labels,'Value',[1]);
-%     ui.message(h,['Nuclei removed, ' num2str(numel(nuclei)) 'nuclei re-labeled']);
-% end
 
 %remove segmented nuclei
 function rmNuclei_Callback2(hObject,eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
+    settings=getappdata(h.f,'settings');
+    
     xy = get(h.imStack,'CurrentPoint');
         selection = UserData.BW(round(xy(1,2)),round(xy(1,1)));
         if selection ==0;
@@ -579,7 +610,7 @@ function rmNuclei_Callback2(hObject,eventdata)
         end
     cla(h.imStack);
     ui.message(h,['Removing the following nuclei: ' num2str(selection) 'please wait ...']);
-    [nuclei, BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,selection);
+    [nuclei, BW]=filterSegmentation(UserData.BW,UserData.I2,h.imStack,settings.NucleiAreaFilter,selection);
     im=findobj(get(h.imStack,'Children'),'Type','image');
     set(im,'uicontextmenu',h.hcmenu);
     UserData.nuclei=nuclei;
@@ -607,23 +638,15 @@ function add_Class_Callback(hObject,eventdata)
     set(h.imStack,'NextPlot','Replacechildren');
 end
 
-
-
-
-
-
-%select segmented nuclei to remove
-% function rmNucleiList_Callback(hObject,eventdata)
-%     h=guidata(hObject);
-%     selection=get(gcbo,'Value'); 
-%     ui.message(h,['Selected nuclei to be removed: ' num2str(selection)]);    
-% end
-%count dots for selected channels
 function countDots_Callback(hObject, eventdata)
     h=guidata(hObject);
     UserData=get(h.f,'UserData');
-    UserData.threshold_num=100;
+
     selection=get(h.ChannelList,'Value');
+    if isempty(selection)
+        ui.message(h,'select channels from list');
+        return
+    end
     set(h.countNext,'Visible','on');
     set(h.tb.segment,'Enable','off');
     set(h.tb.project,'Enable','off');
@@ -631,10 +654,9 @@ function countDots_Callback(hObject, eventdata)
     set(h.ax{2},'Visible','on');
     set(h.ax{3},'Visible','on');
     set(h.ax{4},'Visible','on');
+    
     UserData=thresholdDots(UserData,h,selection);
-%     [UData adots]=countDots(UserData,h,selection,);
-%     UserData.UData=UData;
-%     UserData.dots=adots;
+    
     try
     set(h.f,'Userdata',UserData);
     catch err
@@ -660,10 +682,9 @@ function saveCounts_Callback(hObject,eventdata)
         svFullPath=fullfile(svPath, svName);
         save(svFullPath,'-mat','UserData')
         
-        delete(allchild(h.ax{1})); 
-        delete(allchild(h.ax{2})); 
-        delete(allchild(h.ax{3})); 
-        delete(allchild(h.ax{4})); 
+        h=initialize(h.f,h);
+        
+        ui.message(h,['Data Saved!, Channels counted:' UserData.channels(UserData.Counted)])
         
         
         
@@ -671,111 +692,7 @@ function saveCounts_Callback(hObject,eventdata)
         return
     end
 end
-%calibrate images for the shift
-function newCalibration_Callback(hObject,eventdata)
-    h=guidata(hObject);
-    UserData=get(h.f,'UserData');
-    c=get(gcbo,'UserData');
-    [imname, impath, imfilter_index] = uigetfile([c.name '*.tif'],['Open an beads file (.tif) for channel ' c.name]);
-    
-    if imfilter_index
-        file_index=imname((end-6):(end-4));
-        ch_b_file=[impath imname];
-        dapi_b_file=[impath 'dapi_' file_index '.tif'];
-        tform=calibrateShift(dapi_b_file,ch_b_file);
-        [svName,svPath,FilterIndex] = uiputfile('*.mat','Save your calibration',[impath c.name 'calib']);
-        
-        if FilterIndex
-            svFullPath=fullfile(svPath, svName);
-            UserData.tform{c.val}=tform;
-            set(h.f,'Userdata',UserData);
-            save(svFullPath,'-mat','tform')
-            set(h.pathCalib{c.val},'String',svName)
-            
-        else
-            %TODO set values to empty
-            return
-        end
-        
-    else
-        %TODO set values to empty
-        return
-    end
-end
-%load previously calculated calibration
-function loadCalibration_Callback(hObject,eventdata)
-    h=guidata(hObject);
-    UserData=get(h.f,'UserData');
-    c=get(gcbo,'UserData');
-    [mname, mpath, mfilter_index] = uigetfile('*.mat',['Open calibration file for channel ' c.name]);
-    if mfilter_index
-        mFullPath=fullfile(mpath, mname);
-        load(mFullPath,'-mat','tform')
-        UserData.tform{c.val}=tform;
-        set(h.f,'Userdata',UserData);
-        set(h.pathCalib{c.val},'String',mname)
-    else
-        %TODO set values to empty
-        return
-    end
-end
 
-function countNext_Callback(hObject,eventdata)
-    set(gcbo,'UserData',1)
-end
-
-
-
-
-%---------Utilities---------------------------------------
-%generate controls for the available channels
-    function h = setSettingsControls(h,channels)     
-    chs=numel(channels);
-     for ch = 1:chs
-        %panelSettings: buttons for settings and calibration
-        %shift calibration for cy5
-        h.pathCalibs = cell(chs, 1);
-        h.calib = cell(chs, 1);
-        h.loadCalib = cell(chs, 1);
-        ypos=.92-.21*(ch-1);
-        uicontrol( ...
-            'Parent', h.panelSettings, ...
-            'Style','text', ...
-            'Units', 'normalized', ...
-            'Position', [.02, ypos, .96, .06], ...
-            'String', [channels{ch} 'shift calibration'], ...
-            'HorizontalAlignment', 'left');
-        h.pathCalib{ch} = uicontrol( ...
-            'Parent', h.panelSettings, ...
-            'Style', 'edit', ...
-            'Units', 'normalized', ...
-            'Position', [.02, ypos-.05, .96, .06], ...
-            'String', '', ...
-            'Callback', '', ...
-            'BusyAction', 'cancel');
-        cn.name=channels{ch};
-        cn.val=ch;
-        h.calib{ch} = uicontrol( ...
-            'Parent', h.panelSettings, ...
-            'Style', 'pushbutton', ...
-            'Units', 'normalized', ...
-            'Position', [.02, ypos-.15, .49, .1], ...
-            'String', 'New', ...
-            'Callback', @newCalibration_Callback, ...
-            'UserData',cn, ...
-            'BusyAction', 'cancel');
-
-        h.loadCalib{ch} = uicontrol( ...
-            'Parent', h.panelSettings, ...
-            'Style', 'pushbutton', ...
-            'Units', 'normalized', ...
-            'Position', [.51, ypos-.15, .47, .1], ...
-            'String', 'Load', ...
-            'UserData',cn, ...
-            'Callback', @loadCalibration_Callback, ...
-            'BusyAction', 'cancel');
-     end
-    end
 
 
 

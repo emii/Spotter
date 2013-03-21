@@ -1,12 +1,13 @@
 function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,thresholds,thresholdfn,cv,BW,nuclei,ch,cell_dif)
     
     ncell_dif=nan;
+    nuc=1;
     %h1===========
     set(h.countNext,'Enable','on');
     st=getappdata(h.f,'status');
+    settings=getappdata(h.f,'settings');
     delete(get(h.ax{1},'Children'));
     set(h.ax{1},'NextPlot','add');
-    set(h.tb.save,'Enable','off');
     
     %yl1=max(thresholdfn)+max(thresholdfn)*0.1;
     yl1=2000;
@@ -40,7 +41,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
     %imStack============
     
-    cm=brighten(hsv(50),-.5);
+    %cm=brighten(hsv(50),-.5);
     
     delete(get(h.imStack,'Children'));
     set(h.imStack,'NextPlot','add');
@@ -61,12 +62,12 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     
     if st.segmented
     [nn_ims, snuc]=crop_cell(znims,BW,nuclei(1));
-    xi=nuclei(1).PixelList(:,1);
-    yi=nuclei(1).PixelList(:,2);
+    xi=nuclei(nuc).PixelList(:,1);
+    yi=nuclei(nuc).PixelList(:,2);
     RECT=[min(xi) min(yi) max(xi)-min(xi)  max(yi)-min(yi)];
     else
         nn_ims=znims;
-        snuc=nuclei(1);
+        snuc=nuclei(nuc);
         RECT=[1 1 size(znims,1)  size(znims,2)];
         
     end
@@ -84,7 +85,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     x1=round(dots(:,2));y1=round(dots(:,1));
     dots_nuc=BW(sub2ind(size(BW), x1, y1));
     
-    dots_idx=dots_nuc==1;
+    dots_idx=dots_nuc==nuc;
     ndots=dots(dots_idx,:);
     ndots=ndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1);
 
@@ -92,7 +93,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
     %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
     %scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
     axes(h.ax{3})
-    scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
+    scatter(h.ax{3},ndots(:,1),ndots(:,2),'SizeData',intensity(dots_idx).*150,'MarkerEdgeColor','m');
 
 
     
@@ -142,7 +143,7 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
 
         %p3=scatter(h.ax{3},dots(:,1),dots(:,2),'MarkerEdgeColor','g');  
         axes(h.ax{3})
-        scatter(h.ax{3},ndots(:,1),ndots(:,2),'CData',cm(round(ndots(:,3)),:),'SizeData',intensity(dots_idx).*150);
+        scatter(h.ax{3},ndots(:,1),ndots(:,2),'SizeData',intensity(dots_idx).*150,'MarkerEdgeColor','m');
 
         
     end
@@ -164,12 +165,12 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         x = pt(1);
         if x > 1
             x=1;
-        elseif x<0.01
-            x=0.01;
+        elseif x<min(thresholds);
+            x=min(thresholds);
         end
-        ncell_dif=cell_dif{round(x*100)};
-        x= thresholds(round(x*100));
-        y = thresholdfn(round(x*100)); 
+        ncell_dif=cell_dif{round(x*settings.thr_number)};
+        x= thresholds(round(x*settings.thr_number));
+        y = thresholdfn(round(x*settings.thr_number)); 
         
         
         set(l1,'XData',x*[1 1])
@@ -186,9 +187,19 @@ function [nuclei,bwl] = updateAxes(h,x,y,cvx,dots,vols,intensity,bwl,n_ims,snuc,
         [dots, vols, intensity, bwl]=getdots(n_ims,x);
         set(p3,'XData',dots(:,1),'YData',dots(:,2));
         utilities.plotBoundaries(znims,nuclei(ncell_dif),'r',h.imStack,0);
-        %set(p3,'XData',dots(:,1),'YData',dots(:,2),'CData',cm(round(dots(:,3)),:),'SizeData',intensity.*150);
         x1=round(dots(:,2));y1=round(dots(:,1));
         dots_nuc=BW(sub2ind(size(BW), x1, y1));
+        
+        
+        delete(findobj(h.ax{3},'type','hggroup'));
+        dots_idx=dots_nuc==nuc;
+        ndots=dots(dots_idx,:);
+        ndots=ndots-repmat([RECT(1)-1 RECT(2)-1 0],size(ndots,1),1);
+        scatter(h.ax{3},ndots(:,1),ndots(:,2),'SizeData',intensity(dots_idx).*150,'MarkerEdgeColor','m');
+
+        
+        
+        
         set(hf,'ButtonDownFcn',@plotSingleNuclei);
     end
     

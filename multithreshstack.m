@@ -40,7 +40,7 @@ for i = 1:npoints
   nout(i) = n;
 
   sprintf('\b\b\b%3i',i);
-  waitbar(0.01*i,wb,['Computing threshold :    ' num2str(i)])
+  waitbar((1/npoints)*i,wb,['Computing threshold :    ' num2str(i)])
 end;
 fprintf('\n');
 close(wb)

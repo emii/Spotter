@@ -1,6 +1,10 @@
-function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
+function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,thr,bad)
 %%get blobmesurements and plot the segmentation result
-    if nargin == 4
+
+
+    thrup=thr(2);thrlow=thr(1);
+    
+    if nargin == 5
         for i = bad
             DL2(DL2==i)=0;
         end
@@ -36,12 +40,12 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
     labelShiftX = -7;	% Used to align the labels in the centers of the blobs.
     for k = 1 : numberOfBoundaries
         thisBoundary = boundaries{k};
-        plot(ax,thisBoundary(:,2), thisBoundary(:,1), 'g', 'LineWidth', 1); 
+        plot(ax,thisBoundary(:,2), thisBoundary(:,1), 'g', 'LineWidth', 1,'HitTest','off'); 
         blobMeasurements(k).boundaries=boundaries{k};
     end
     blobECD = zeros(1, numberOfBlobs);
     filterArea=blobECD;
-    thrup=40000;thrlow=500;
+
     % Print header line in the command window.
     fprintf(1,'Blob #    Area   Perimeter    Centroid       Diameter\n');
     % Loop over all blobs printing their measurements to the command window.
@@ -62,7 +66,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
         blobCentroid = blobMeasurements(k).Centroid;		% Get centroid.
         blobECD(k) = sqrt(4 * blobArea / pi);					% Compute ECD - Equivalent Circular Diameter.
         fprintf(1,'#%2d %11.1f %8.1f %8.1f %8.1f %8.1f \n', k, blobArea, blobPerimeter, blobCentroid, blobECD(k));
-        text(blobCentroid(1) + labelShiftX, blobCentroid(2), num2str(k), 'FontSize', 14, 'FontWeight', 'Bold','Parent',ax); 
+        text(blobCentroid(1) + labelShiftX, blobCentroid(2), num2str(k), 'FontSize', 14, 'FontWeight', 'Bold','Parent',ax,'Hittest','off'); 
     %calculate reference channel intensity
    
     
@@ -75,7 +79,7 @@ function [blobMeasurements, DL2]= filterSegmentation(DL2,zim,ax,bad)
         DL2(DL2>0)=1;
         DL2=imclearborder(DL2);
         DL3=bwlabel(DL2);
-        [blobMeasurements, DL2]= filterSegmentation(DL3,zim,ax);
+        [blobMeasurements, DL2]= filterSegmentation(DL3,zim,ax,thr);
     else
         drawnow
         set(ax,'NextPlot','ReplaceChildren')

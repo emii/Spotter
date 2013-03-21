@@ -8,11 +8,11 @@ end
 labelShiftX = 0;	% Used to align the labels in the centers of the blobs.
 for k = 1:size(cells,1)
     
-plot(hn,cells(k).boundaries(:,2),cells(k).boundaries(:,1),'Color',color)
+plot(hn,cells(k).boundaries(:,2),cells(k).boundaries(:,1),'Color',color,'HitTest','off')
 %axis square
 if label
 text(cells(k).Centroid(1) + labelShiftX, cells(k).Centroid(2), cells(k).Label,...
-     'FontSize', 9, 'FontWeight', 'Bold','Color','w','Parent',hn);
+     'FontSize', 9, 'FontWeight', 'Bold','Color','w','Parent',hn,'HitTest','off');
 end
 end
 h=hn;
