@@ -1,3 +1,4 @@
 Hi, this is my project for the processing of Hi-resolution microscopy image stack, I am currently approaching this using the image processing toolbox from MATLAB. It just requires two functions apart from the built-in ones, which can be found at the matworks repo. (tight_subplot, imoverlay)
 Some of the functions here are highly based on previous work done by S.I. and A. R. 
 Remark: this is a personal ongoing project, you can drop me an email at eizquierd at gmail com
+Remark2: I will also be working on this project, charlesbakervt attt gmail com
